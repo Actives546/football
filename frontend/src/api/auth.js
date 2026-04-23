@@ -15,3 +15,11 @@ export function verifyCode(phone, code) {
     params: { phone, code }
   })
 }
+
+export function loginByUsername(username, password) {
+  return request({
+    url: '/auth/login',
+    method: 'post',
+    data: { username, password }
+  })
+}
