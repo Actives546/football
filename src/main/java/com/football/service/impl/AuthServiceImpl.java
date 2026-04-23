@@ -8,17 +8,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    @Resource
+    @Autowired
     private RedisUtil redisUtil;
 
-    @Resource
+    @Autowired
     private VerifyCodeUtil verifyCodeUtil;
 
     @Value("${football.verify-code.expire-time:300}")

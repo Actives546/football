@@ -5,14 +5,14 @@ import com.football.dto.SendCodeDTO;
 import com.football.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Resource
+    @Autowired
     private AuthService authService;
 
     @PostMapping("/sendCode")

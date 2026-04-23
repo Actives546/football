@@ -1,24 +1,79 @@
-# Compiled class file
-*.class
+# ============= 1. 系统通用忽略 =============
+# macOS 系统文件
+.DS_Store
+# Windows 系统文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# 临时交换文件
+*.swp
+*.swo
 
-# Log file
+# ============= 2. Java 后端（SpringBoot）忽略 =============
+# 编译输出目录（Maven构建产物）
+/target/
+!/target/.gitkeep  # 保留target目录的.gitkeep文件
+# 日志文件
 *.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+logs/
+# 本地开发环境配置（敏感信息）
+**/application-dev.yml
+**/application-local.yml
+# 虚拟环境/临时文件
+*.tmp
+*.temp
+# 编译类文件
+*.class
+# 打包文件
 *.jar
 *.war
 *.nar
 *.ear
+# 其他构建产物
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# JVM 崩溃日志
 hs_err_pid*
 replay_pid*
+
+# ============= 3. 前端 Vue3 忽略 =============
+# 依赖安装目录
+/frontend/node_modules/
+# 打包构建目录（Vite输出，已合并到后端static，此处仅保留源码）
+/frontend/dist/
+# 包管理锁文件（根据团队习惯选择是否提交，通常不提交）
+/frontend/package-lock.json
+/frontend/yarn.lock
+/frontend/pnpm-lock.yaml
+# 本地环境变量
+/frontend/.env.local
+/frontend/.env.development.local
+# IDE 配置
+/frontend/.vscode/
+!/frontend/.vscode/extensions.json
+
+# ============= 4. IDE 开发工具忽略 =============
+# IntelliJ IDEA / IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+# VS Code
+.vscode/
+!.vscode/extensions.json
+# 其他IDE
+.ncb
+*.sdf
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ============= 5. 项目特有规则 =============
+# 前端源码目录（仅忽略构建产物，源码保留）
+/src/main/frontend/dist/
+# 个人开发缓存
+/.idea/
+/frontend/node_modules/
