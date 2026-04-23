@@ -217,18 +217,33 @@ const startCountdown = () => {
   }, 1000)
 }
 
+// 1. 处理发送验证码按钮点击事件
 const handleSendCode = async () => {
+  // 2. 如果正在发送中，直接返回，防止重复点击
   if (isSending.value) return
   
+  // 3. 验证手机号格式是否正确
   const valid = await phoneFormRef.value.validateField('phone').catch(() => false)
+  // 4. 验证失败则直接返回
   if (!valid) return
   
   try {
-    await sendSmsCode({ phone: phoneForm.phone })
-    ElMessage.success('验证码发送成功')
+    // 5. 调用发送验证码 API，传入手机号参数，等待响应结果
+    const response = await sendSmsCode({ phone: phoneForm.phone })
+    // 6. 打印完整响应数据到控制台，方便调试查看
+    console.log('发送验证码响应：', JSON.stringify(response, null, 2))
+    // 7. 从响应数据中获取返回的数据对象
+    const { data } = response
+    // 8. 打印 data 对象，确认是否包含验证码
+    console.log('响应中的 data：', data)
+    // 9. 显示成功消息，包含验证码（方便开发调试，生产环境应移除）
+    ElMessage.success(`验证码发送成功！验证码：${data?.code || '已发送至手机'}`)
+    // 10. 启动倒计时，防止频繁发送
     startCountdown()
   } catch (error) {
+    // 11. 捕获错误并打印到控制台
     console.error('发送验证码失败：', error)
+    // 12. 显示错误提示消息
     ElMessage.error(error.message || '验证码发送失败')
   }
 }
