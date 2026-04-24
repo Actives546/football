@@ -258,37 +258,85 @@ const handleTabChange = () => {
 }
 
 const handlePhoneLogin = async () => {
+  // 1. 验证手机号登录表单
   const valid = await phoneFormRef.value.validate().catch(() => false)
+  // 2. 验证失败则直接返回
   if (!valid) return
   
+  // 3. 设置加载状态为true，显示loading
   phoneLoading.value = true
   try {
-    await verifyCode(phoneForm.phone, phoneForm.code)
+    // 4. 调用手机号登录API，传入手机号和验证码
+    const response = await loginByPhone(phoneForm.phone, phoneForm.code)
+    // 5. 打印登录响应数据，方便调试
+    console.log('手机号登录响应：', response)
+    // 6. 从响应中获取data数据（包含token和用户信息）
+    const { data } = response
+    // 7. 显示登录成功提示消息
     ElMessage.success('登录成功')
-    userStore.setToken('mock-token-phone-' + Date.now())
+    // 8. 将token保存到store中（store会同步保存到localStorage）
+    userStore.setToken(data.token)
+    // 9. 将用户信息保存到store中
+    userStore.setUserInfo({
+      userId: data.userId,
+      username: data.username,
+      phone: data.phone,
+      nickname: data.nickname,
+      avatar: data.avatar
+    })
+    // 10. 打印保存的token，方便调试
+    console.log('保存的Token：', data.token)
+    // 11. 跳转到首页
     router.push('/')
   } catch (error) {
-    console.error('登录失败：', error)
+    // 12. 捕获错误并打印到控制台
+    console.error('手机号登录失败：', error)
+    // 13. 显示错误提示消息
     ElMessage.error(error.message || '登录失败')
   } finally {
+    // 14. 无论成功还是失败，都关闭加载状态
     phoneLoading.value = false
   }
 }
 
 const handleUsernameLogin = async () => {
+  // 1. 验证用户名密码登录表单
   const valid = await usernameFormRef.value.validate().catch(() => false)
+  // 2. 验证失败则直接返回
   if (!valid) return
   
+  // 3. 设置加载状态为true，显示loading
   usernameLoading.value = true
   try {
-    await loginByUsername(usernameForm.username, usernameForm.password)
+    // 4. 调用用户名密码登录API，传入用户名和密码
+    const response = await loginByUsername(usernameForm.username, usernameForm.password)
+    // 5. 打印登录响应数据，方便调试
+    console.log('用户名密码登录响应：', response)
+    // 6. 从响应中获取data数据（包含token和用户信息）
+    const { data } = response
+    // 7. 显示登录成功提示消息
     ElMessage.success('登录成功')
-    userStore.setToken('mock-token-' + Date.now())
+    // 8. 将token保存到store中（store会同步保存到localStorage）
+    userStore.setToken(data.token)
+    // 9. 将用户信息保存到store中
+    userStore.setUserInfo({
+      userId: data.userId,
+      username: data.username,
+      phone: data.phone,
+      nickname: data.nickname,
+      avatar: data.avatar
+    })
+    // 10. 打印保存的token，方便调试
+    console.log('保存的Token：', data.token)
+    // 11. 跳转到首页
     router.push('/')
   } catch (error) {
-    console.error('登录失败：', error)
+    // 12. 捕获错误并打印到控制台
+    console.error('用户名密码登录失败：', error)
+    // 13. 显示错误提示消息
     ElMessage.error(error.message || '登录失败')
   } finally {
+    // 14. 无论成功还是失败，都关闭加载状态
     usernameLoading.value = false
   }
 }

@@ -32,18 +32,42 @@ export function verifyCode(phone, code) {
   })
 }
 
-// 12. 用户名密码登录接口
-// 参数 username: 用户名
-// 参数 password: 密码
-// 返回值: Promise 对象，包含登录结果
-export function loginByUsername(username, password) {
+// 12. 手机号验证码登录接口
+// 参数 phone: 手机号
+// 参数 code: 验证码
+// 返回值: Promise 对象，包含登录结果（token和用户信息）
+export function loginByPhone(phone, code) {
   // 13. 调用 request 实例发送 POST 请求
   return request({
     // 14. 请求 URL
     url: '/auth/login',
     // 15. 请求方法为 POST
     method: 'post',
-    // 16. 请求体数据
-    data: { username, password }
+    // 16. 请求体数据，登录类型为 phone
+    data: {
+      loginType: 'phone',
+      phone: phone,
+      code: code
+    }
+  })
+}
+
+// 17. 用户名密码登录接口
+// 参数 username: 用户名
+// 参数 password: 密码
+// 返回值: Promise 对象，包含登录结果（token和用户信息）
+export function loginByUsername(username, password) {
+  // 18. 调用 request 实例发送 POST 请求
+  return request({
+    // 19. 请求 URL
+    url: '/auth/login',
+    // 20. 请求方法为 POST
+    method: 'post',
+    // 21. 请求体数据，登录类型为 password
+    data: {
+      loginType: 'password',
+      username: username,
+      password: password
+    }
   })
 }
