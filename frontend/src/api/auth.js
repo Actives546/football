@@ -71,3 +71,14 @@ export function loginByUsername(username, password) {
     }
   })
 }
+
+// 用户注册接口
+// 参数 data: 包含注册信息的对象 { username, phone, password, confirmPassword, code }
+// 返回值: Promise 对象，包含注册结果
+export function register(data) {
+  return request({
+    url: '/auth/register',
+    method: 'post',
+    data
+  })
+}

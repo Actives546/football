@@ -4,10 +4,12 @@ import cn.hutool.crypto.digest.BCrypt;
 import com.football.common.BusinessException;
 import com.football.common.Result;
 import com.football.dto.LoginDTO;
+import com.football.dto.RegisterDTO;
 import com.football.entity.User;
 import com.football.mapper.UserMapper;
 import com.football.service.AuthService;
 import com.football.util.JwtUtil;
+import com.football.util.PasswordEncoder;
 import com.football.util.RedisUtil;
 import com.football.util.VerifyCodeUtil;
 import com.football.vo.LoginVO;
@@ -266,5 +268,52 @@ public class AuthServiceImpl implements AuthService {
         loginVO.setAvatar(user.getAvatar());
         // 8. 返回构建好的LoginVO对象
         return loginVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Boolean> register(RegisterDTO registerDTO) {
+        // 1. 校验两次密码是否一致
+        if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
+            throw new BusinessException("两次输入的密码不一致");
+        }
+
+        // 2. 校验验证码
+        verifyCode(registerDTO.getPhone(), registerDTO.getCode());
+
+        // 3. 检查用户名是否已存在
+        User existUserByUsername = userMapper.selectByUsername(registerDTO.getUsername());
+        if (existUserByUsername != null) {
+            throw new BusinessException("用户名已存在，请更换用户名");
+        }
+
+        // 4. 检查手机号是否已注册
+        User existUserByPhone = userMapper.selectByPhone(registerDTO.getPhone());
+        if (existUserByPhone != null) {
+            throw new BusinessException("该手机号已注册，请直接登录");
+        }
+
+        // 5. 创建新用户对象
+        User user = new User();
+        // 6. 设置用户名
+        user.setUsername(registerDTO.getUsername());
+        // 7. 设置手机号
+        user.setPhone(registerDTO.getPhone());
+        // 8. 密码加密存储
+        user.setPassword(PasswordEncoder.encode(registerDTO.getPassword()));
+        // 9. 设置默认昵称
+        user.setNickname("足球迷" + registerDTO.getPhone().substring(registerDTO.getPhone().length() - 4));
+        // 10. 设置用户状态为正常（1-正常）
+        user.setStatus(1);
+
+        // 11. 插入新用户到数据库
+        userMapper.insert(user);
+
+        // 12. 记录注册成功的日志
+        log.info("用户注册成功，用户名：{}，手机号：{}，用户ID：{}", 
+                user.getUsername(), user.getPhone(), user.getId());
+
+        // 13. 返回注册成功
+        return Result.success("注册成功", true);
     }
 }
