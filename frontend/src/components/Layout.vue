@@ -34,6 +34,10 @@
             <el-icon><List /></el-icon>
             <template #title>赛事信息</template>
           </el-menu-item>
+          <el-menu-item index="/season/list">
+            <el-icon><Calendar /></el-icon>
+            <template #title>赛季管理</template>
+          </el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>
@@ -99,6 +103,7 @@ import {
   HomeFilled,
   Trophy,
   List,
+  Calendar,
   Fold,
   Expand,
   UserFilled,

@@ -4,6 +4,7 @@ import { useUserStore } from '@/store'
 const Layout = () => import('@/components/Layout.vue')
 const Dashboard = () => import('@/views/Dashboard.vue')
 const MatchList = () => import('@/views/MatchList.vue')
+const SeasonList = () => import('@/views/SeasonList.vue')
 const Login = () => import('@/views/Login.vue')
 const Register = () => import('@/views/Register.vue')
 
@@ -24,6 +25,12 @@ const routes = [
         name: 'MatchList',
         component: MatchList,
         meta: { title: '赛事信息', requiresAuth: true }
+      },
+      {
+        path: 'season/list',
+        name: 'SeasonList',
+        component: SeasonList,
+        meta: { title: '赛季管理', requiresAuth: true }
       }
     ]
   },

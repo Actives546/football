@@ -1,38 +1,39 @@
 <template>
-  <div class="match-list-container">
+  <div class="season-list-container">
     <el-card class="search-card" shadow="never">
       <el-form :model="searchForm" label-width="100px">
         <el-row :gutter="24">
           <el-col :xs="24" :sm="12" :md="8">
-            <el-form-item label="赛事名称">
+            <el-form-item label="所属赛事">
+              <el-select
+                v-model="searchForm.matchId"
+                placeholder="请选择赛事"
+                clearable
+                filterable
+                style="width: 100%"
+                @change="handleSearch"
+              >
+                <el-option
+                  v-for="item in matchOptions"
+                  :key="item.id"
+                  :label="item.matchName"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="8">
+            <el-form-item label="赛季名称">
               <el-input
-                v-model="searchForm.matchName"
-                placeholder="请输入赛事名称"
+                v-model="searchForm.seasonName"
+                placeholder="请输入赛季名称"
                 clearable
                 @keyup.enter="handleSearch"
               />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12" :md="8">
-            <el-form-item label="赛事类型">
-              <el-select
-                v-model="searchForm.matchType"
-                placeholder="请选择赛事类型"
-                clearable
-                style="width: 100%"
-                @change="handleSearch"
-              >
-                <el-option label="足球联赛" value="足球联赛" />
-                <el-option label="杯赛" value="杯赛" />
-                <el-option label="友谊赛" value="友谊赛" />
-                <el-option label="亚冠联赛" value="亚冠联赛" />
-                <el-option label="欧冠联赛" value="欧冠联赛" />
-                <el-option label="其他" value="其他" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12" :md="8">
-            <el-form-item label="赛事状态">
+            <el-form-item label="赛季状态">
               <el-select
                 v-model="searchForm.status"
                 placeholder="请选择状态"
@@ -43,7 +44,6 @@
                 <el-option label="未开始" value="SCHEDULED" />
                 <el-option label="进行中" value="LIVE" />
                 <el-option label="已结束" value="FINISHED" />
-                <el-option label="已取消" value="CANCELLED" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -67,7 +67,10 @@
       <template #header>
         <div class="table-header">
           <div class="header-left">
-            <span class="table-title">赛事信息列表</span>
+            <span class="table-title">赛季信息列表</span>
+            <el-tag type="info" effect="light" class="table-count" v-if="currentMatchName">
+              当前赛事：{{ currentMatchName }}
+            </el-tag>
             <el-tag type="info" effect="light" class="table-count">共 {{ total }} 条记录</el-tag>
           </div>
           <div class="header-right">
@@ -77,7 +80,7 @@
             </el-button>
             <el-button type="primary" @click="handleAdd">
               <el-icon><Plus /></el-icon>
-              新增赛事
+              新增赛季
             </el-button>
           </div>
         </div>
@@ -94,32 +97,36 @@
       >
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="matchName" label="赛事名称" min-width="220" show-overflow-tooltip>
+        <el-table-column prop="matchName" label="所属赛事" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="match-name-cell">
-              <el-avatar :size="36" class="match-avatar" v-if="row.coverImage">
-                <img :src="row.coverImage" />
-              </el-avatar>
-              <el-avatar :size="36" class="match-avatar match-avatar-default" v-else>
-                <el-icon :size="18"><Trophy /></el-icon>
-              </el-avatar>
-              <span class="match-name-text">{{ row.matchName }}</span>
+              <el-tag size="small" type="primary" effect="light">
+                {{ row.matchName }}
+              </el-tag>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="matchType" label="赛事类型" width="120" align="center">
+        <el-table-column prop="seasonName" label="赛季名称" min-width="220" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-tag size="small" effect="light" :type="getMatchTypeTagType(row.matchType)">
-              {{ row.matchType }}
-            </el-tag>
+            <div class="season-name-cell">
+              <el-avatar :size="32" class="season-avatar">
+                <el-icon :size="16"><Calendar /></el-icon>
+              </el-avatar>
+              <div class="season-info">
+                <span class="season-name">{{ row.seasonName }}</span>
+                <span class="season-year" v-if="row.seasonYear">{{ row.seasonYear }}</span>
+              </div>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="startTime" label="开始时间" width="170" align="center">
+        <el-table-column prop="startDate" label="开始日期" width="120" align="center">
           <template #default="{ row }">
-            <div class="time-cell">
-              <el-icon class="time-icon"><Clock /></el-icon>
-              {{ formatDate(row.startTime) }}
-            </div>
+            {{ formatDate(row.startDate) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="endDate" label="结束日期" width="120" align="center">
+          <template #default="{ row }">
+            {{ formatDate(row.endDate) }}
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
@@ -129,13 +136,17 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="240" align="center" fixed="right">
+        <el-table-column prop="currentRound" label="轮次" width="120" align="center">
           <template #default="{ row }">
-            <el-tooltip content="查看赛季" placement="top">
-              <el-button type="success" link @click="handleViewSeasons(row)">
-                <el-icon><Calendar /></el-icon>
-              </el-button>
-            </el-tooltip>
+            <div class="round-info">
+              <span class="current-round">{{ row.currentRound || 0 }}</span>
+              <span class="round-divider">/</span>
+              <span class="total-rounds">{{ row.totalRounds || '-' }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="220" align="center" fixed="right">
+          <template #default="{ row }">
             <el-tooltip content="查看" placement="top">
               <el-button type="primary" link @click="handleView(row)">
                 <el-icon><View /></el-icon>
@@ -173,7 +184,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="700px"
+      width="650px"
       :close-on-click-modal="false"
       destroy-on-close
     >
@@ -186,32 +197,41 @@
       >
         <el-row :gutter="24">
           <el-col :span="12">
-            <el-form-item label="赛事名称" prop="matchName">
-              <el-input v-model="formData.matchName" placeholder="请输入赛事名称" />
+            <el-form-item label="所属赛事" prop="matchId">
+              <el-select
+                v-model="formData.matchId"
+                placeholder="请选择所属赛事"
+                filterable
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="item in matchOptions"
+                  :key="item.id"
+                  :label="item.matchName"
+                  :value="item.id"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="赛事类型" prop="matchType">
-              <el-select v-model="formData.matchType" placeholder="请选择赛事类型" style="width: 100%">
-                <el-option label="足球联赛" value="足球联赛" />
-                <el-option label="杯赛" value="杯赛" />
-                <el-option label="友谊赛" value="友谊赛" />
-                <el-option label="亚冠联赛" value="亚冠联赛" />
-                <el-option label="欧冠联赛" value="欧冠联赛" />
-                <el-option label="其他" value="其他" />
-              </el-select>
+            <el-form-item label="赛季名称" prop="seasonName">
+              <el-input v-model="formData.seasonName" placeholder="请输入赛季名称" />
             </el-form-item>
           </el-col>
         </el-row>
         
         <el-row :gutter="24">
           <el-col :span="12">
-            <el-form-item label="赛事状态" prop="status">
-              <el-select v-model="formData.status" placeholder="请选择赛事状态" style="width: 100%">
+            <el-form-item label="赛季年份">
+              <el-input v-model="formData.seasonYear" placeholder="请输入赛季年份（如：2024）" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="赛季状态" prop="status">
+              <el-select v-model="formData.status" placeholder="请选择赛季状态" style="width: 100%">
                 <el-option label="未开始" value="SCHEDULED" />
                 <el-option label="进行中" value="LIVE" />
                 <el-option label="已结束" value="FINISHED" />
-                <el-option label="已取消" value="CANCELLED" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -219,45 +239,62 @@
         
         <el-row :gutter="24">
           <el-col :span="12">
-            <el-form-item label="开始时间" prop="startTime">
+            <el-form-item label="开始日期" prop="startDate">
               <el-date-picker
-                v-model="formData.startTime"
-                type="datetime"
-                placeholder="请选择开始时间"
+                v-model="formData.startDate"
+                type="date"
+                placeholder="请选择开始日期"
                 style="width: 100%"
-                format="YYYY-MM-DD HH:mm:ss"
-                value-format="YYYY-MM-DD HH:mm:ss"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="结束时间">
+            <el-form-item label="结束日期">
               <el-date-picker
-                v-model="formData.endTime"
-                type="datetime"
-                placeholder="请选择结束时间"
+                v-model="formData.endDate"
+                type="date"
+                placeholder="请选择结束日期"
                 style="width: 100%"
-                format="YYYY-MM-DD HH:mm:ss"
-                value-format="YYYY-MM-DD HH:mm:ss"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
               />
             </el-form-item>
           </el-col>
         </el-row>
         
-        <el-form-item label="封面图片">
-          <el-input v-model="formData.coverImage" placeholder="请输入封面图片URL（可选）">
-            <template #append>
-              <el-button @click="previewCoverImage">预览</el-button>
-            </template>
-          </el-input>
-        </el-form-item>
+        <el-row :gutter="24">
+          <el-col :span="12">
+            <el-form-item label="总轮次">
+              <el-input-number
+                v-model="formData.totalRounds"
+                :min="0"
+                :max="999"
+                placeholder="请输入总轮次"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="当前轮次">
+              <el-input-number
+                v-model="formData.currentRound"
+                :min="0"
+                :max="999"
+                placeholder="请输入当前轮次"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
         
-        <el-form-item label="赛事描述">
+        <el-form-item label="赛季描述">
           <el-input
             v-model="formData.description"
             type="textarea"
             :rows="4"
-            placeholder="请输入赛事描述信息（可选）"
+            placeholder="请输入赛季描述信息（可选）"
           />
         </el-form-item>
       </el-form>
@@ -272,67 +309,52 @@
     
     <el-dialog
       v-model="detailVisible"
-      title="赛事详情"
-      width="650px"
-      destroy-on-close
-    >
-      <el-descriptions :column="2" border v-if="currentMatch">
-        <el-descriptions-item label="赛事ID" :span="1">{{ currentMatch.id }}</el-descriptions-item>
-        <el-descriptions-item label="赛事名称" :span="1">{{ currentMatch.matchName }}</el-descriptions-item>
-        <el-descriptions-item label="赛事类型" :span="1">
-          <el-tag size="small" :type="getMatchTypeTagType(currentMatch.matchType)">
-            {{ currentMatch.matchType }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="赛事状态" :span="1">
-          <el-tag :type="getStatusType(currentMatch.status)" size="small">
-            {{ getStatusText(currentMatch.status) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="开始时间" :span="1">{{ formatDate(currentMatch.startTime) }}</el-descriptions-item>
-        <el-descriptions-item label="结束时间" :span="1">{{ formatDate(currentMatch.endTime) }}</el-descriptions-item>
-        <el-descriptions-item label="封面图片" :span="2" v-if="currentMatch.coverImage">
-          <el-image :src="currentMatch.coverImage" style="width: 300px; height: 180px;" fit="cover" />
-        </el-descriptions-item>
-        <el-descriptions-item label="赛事描述" :span="2" v-if="currentMatch.description">
-          {{ currentMatch.description }}
-        </el-descriptions-item>
-        <el-descriptions-item label="创建时间" :span="1">{{ formatDate(currentMatch.createTime) }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间" :span="1">{{ formatDate(currentMatch.updateTime) }}</el-descriptions-item>
-      </el-descriptions>
-    </el-dialog>
-    
-    <el-dialog
-      v-model="previewVisible"
-      title="图片预览"
+      title="赛季详情"
       width="600px"
       destroy-on-close
     >
-      <el-image
-        v-if="formData.coverImage"
-        :src="formData.coverImage"
-        fit="contain"
-        style="width: 100%; height: 400px;"
-        :preview-src-list="[formData.coverImage]"
-        :initial-index="0"
-      />
-      <el-empty v-else description="请先输入图片URL" />
+      <el-descriptions :column="2" border v-if="currentSeason">
+        <el-descriptions-item label="赛季ID" :span="1">{{ currentSeason.id }}</el-descriptions-item>
+        <el-descriptions-item label="所属赛事" :span="1">
+          <el-tag size="small" type="primary">
+            {{ currentSeason.matchName }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="赛季名称" :span="1">{{ currentSeason.seasonName }}</el-descriptions-item>
+        <el-descriptions-item label="赛季年份" :span="1">{{ currentSeason.seasonYear || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="赛季状态" :span="1">
+          <el-tag :type="getStatusType(currentSeason.status)" size="small">
+            {{ getStatusText(currentSeason.status) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="轮次进度" :span="1">
+          <span class="detail-round">{{ currentSeason.currentRound || 0 }} / {{ currentSeason.totalRounds || '-' }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="开始日期" :span="1">{{ formatDate(currentSeason.startDate) }}</el-descriptions-item>
+        <el-descriptions-item label="结束日期" :span="1">{{ formatDate(currentSeason.endDate) }}</el-descriptions-item>
+        <el-descriptions-item label="赛季描述" :span="2" v-if="currentSeason.description">
+          {{ currentSeason.description }}
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间" :span="1">{{ formatDateTime(currentSeason.createTime) }}</el-descriptions-item>
+        <el-descriptions-item label="更新时间" :span="1">{{ formatDateTime(currentSeason.updateTime) }}</el-descriptions-item>
+      </el-descriptions>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  getMatchPage,
-  getMatchById,
-  addMatch,
-  updateMatch,
-  deleteMatch,
-  deleteMatchBatch
-} from '@/api/match'
+  getSeasonPage,
+  getSeasonById,
+  addSeason,
+  updateSeason,
+  deleteSeason,
+  deleteSeasonBatch
+} from '@/api/season'
+import { getMatchPage } from '@/api/match'
 import {
   Search,
   Refresh,
@@ -340,30 +362,36 @@ import {
   Delete,
   View,
   Edit,
-  Trophy,
-  Clock,
   Calendar
 } from '@element-plus/icons-vue'
 
-const router = useRouter()
+const route = useRoute()
 
 const loading = ref(false)
 const formLoading = ref(false)
 const submitLoading = ref(false)
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
-const previewVisible = ref(false)
 const isView = ref(false)
-const currentMatch = ref(null)
+const currentSeason = ref(null)
 const multipleSelection = ref([])
 const tableData = ref([])
 const total = ref(0)
+const matchOptions = ref([])
 const tableRef = ref(null)
 const formRef = ref(null)
 
+const currentMatchName = computed(() => {
+  if (searchForm.matchId) {
+    const match = matchOptions.value.find(m => m.id === searchForm.matchId)
+    return match ? match.matchName : ''
+  }
+  return route.query.matchName || ''
+})
+
 const searchForm = reactive({
-  matchName: '',
-  matchType: '',
+  matchId: null,
+  seasonName: '',
   status: ''
 })
 
@@ -374,41 +402,42 @@ const pagination = reactive({
 
 const formData = reactive({
   id: null,
-  matchName: '',
-  matchType: '',
+  matchId: null,
+  seasonName: '',
+  seasonYear: '',
   status: 'SCHEDULED',
-  startTime: null,
-  endTime: null,
+  startDate: null,
+  endDate: null,
   description: '',
-  coverImage: ''
+  totalRounds: null,
+  currentRound: 0
 })
 
 const formRules = {
-  matchName: [
-    { required: true, message: '请输入赛事名称', trigger: 'blur' }
+  matchId: [
+    { required: true, message: '请选择所属赛事', trigger: 'change' }
   ],
-  matchType: [
-    { required: true, message: '请选择赛事类型', trigger: 'change' }
+  seasonName: [
+    { required: true, message: '请输入赛季名称', trigger: 'blur' }
   ],
   status: [
-    { required: true, message: '请选择赛事状态', trigger: 'change' }
+    { required: true, message: '请选择赛季状态', trigger: 'change' }
   ],
-  startTime: [
-    { required: true, message: '请选择开始时间', trigger: 'change' }
+  startDate: [
+    { required: true, message: '请选择开始日期', trigger: 'change' }
   ]
 }
 
 const dialogTitle = computed(() => {
-  if (isView.value) return '查看赛事'
-  return formData.id ? '编辑赛事' : '新增赛事'
+  if (isView.value) return '查看赛季'
+  return formData.id ? '编辑赛季' : '新增赛季'
 })
 
 const getStatusType = (status) => {
   const map = {
     'SCHEDULED': 'info',
     'LIVE': 'warning',
-    'FINISHED': 'success',
-    'CANCELLED': 'danger'
+    'FINISHED': 'success'
   }
   return map[status] || 'info'
 }
@@ -417,24 +446,21 @@ const getStatusText = (status) => {
   const map = {
     'SCHEDULED': '未开始',
     'LIVE': '进行中',
-    'FINISHED': '已结束',
-    'CANCELLED': '已取消'
+    'FINISHED': '已结束'
   }
   return map[status] || status
 }
 
-const getMatchTypeTagType = (type) => {
-  const map = {
-    '足球联赛': 'primary',
-    '杯赛': 'success',
-    '友谊赛': 'info',
-    '亚冠联赛': 'warning',
-    '欧冠联赛': 'danger'
-  }
-  return map[type] || 'info'
+const formatDate = (date) => {
+  if (!date) return '-'
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
-const formatDate = (date) => {
+const formatDateTime = (date) => {
   if (!date) return '-'
   const d = new Date(date)
   const year = d.getFullYear()
@@ -446,15 +472,26 @@ const formatDate = (date) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
+const loadMatchOptions = async () => {
+  try {
+    const res = await getMatchPage({ pageNum: 1, pageSize: 1000 })
+    matchOptions.value = res.data.list || []
+  } catch (error) {
+    console.error('加载赛事列表失败:', error)
+  }
+}
+
 const loadTableData = async () => {
   loading.value = true
   try {
     const params = {
-      ...searchForm,
+      matchId: searchForm.matchId,
+      seasonName: searchForm.seasonName,
+      status: searchForm.status,
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize
     }
-    const res = await getMatchPage(params)
+    const res = await getSeasonPage(params)
     tableData.value = res.data.list || []
     total.value = res.data.total || 0
   } catch (error) {
@@ -471,8 +508,8 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  searchForm.matchName = ''
-  searchForm.matchType = ''
+  searchForm.matchId = null
+  searchForm.seasonName = ''
   searchForm.status = ''
   handleSearch()
 }
@@ -493,13 +530,15 @@ const handleSelectionChange = (val) => {
 
 const resetForm = () => {
   formData.id = null
-  formData.matchName = ''
-  formData.matchType = ''
+  formData.matchId = searchForm.matchId || null
+  formData.seasonName = ''
+  formData.seasonYear = ''
   formData.status = 'SCHEDULED'
-  formData.startTime = null
-  formData.endTime = null
+  formData.startDate = null
+  formData.endDate = null
   formData.description = ''
-  formData.coverImage = ''
+  formData.totalRounds = null
+  formData.currentRound = 0
 }
 
 const handleAdd = () => {
@@ -517,8 +556,8 @@ const handleEdit = (row) => {
 
 const handleView = async (row) => {
   try {
-    const res = await getMatchById(row.id)
-    currentMatch.value = res.data
+    const res = await getSeasonById(row.id)
+    currentSeason.value = res.data
     detailVisible.value = true
   } catch (error) {
     ElMessage.error('获取详情失败')
@@ -526,24 +565,14 @@ const handleView = async (row) => {
   }
 }
 
-const handleViewSeasons = (row) => {
-  router.push({
-    path: '/season/list',
-    query: {
-      matchId: row.id,
-      matchName: row.matchName
-    }
-  })
-}
-
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除赛事「${row.matchName}」吗？`, '提示', {
+  ElMessageBox.confirm(`确定要删除赛季「${row.seasonName}」吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
     try {
-      await deleteMatch(row.id)
+      await deleteSeason(row.id)
       ElMessage.success('删除成功')
       loadTableData()
     } catch (error) {
@@ -554,17 +583,17 @@ const handleDelete = (row) => {
 
 const handleBatchDelete = () => {
   if (multipleSelection.value.length === 0) {
-    ElMessage.warning('请选择要删除的赛事')
+    ElMessage.warning('请选择要删除的赛季')
     return
   }
-  ElMessageBox.confirm(`确定要删除选中的 ${multipleSelection.value.length} 条赛事吗？`, '提示', {
+  ElMessageBox.confirm(`确定要删除选中的 ${multipleSelection.value.length} 条赛季吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
     try {
       const ids = multipleSelection.value.map(item => item.id)
-      await deleteMatchBatch(ids)
+      await deleteSeasonBatch(ids)
       ElMessage.success('批量删除成功')
       multipleSelection.value = []
       loadTableData()
@@ -581,10 +610,10 @@ const handleSubmit = async () => {
   submitLoading.value = true
   try {
     if (formData.id) {
-      await updateMatch(formData)
+      await updateSeason(formData)
       ElMessage.success('更新成功')
     } else {
-      await addMatch(formData)
+      await addSeason(formData)
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false
@@ -596,21 +625,21 @@ const handleSubmit = async () => {
   }
 }
 
-const previewCoverImage = () => {
-  if (!formData.coverImage) {
-    ElMessage.warning('请先输入图片URL')
-    return
+watch(() => route.query, (query) => {
+  if (query.matchId) {
+    searchForm.matchId = Number(query.matchId)
+    loadTableData()
   }
-  previewVisible.value = true
-}
+}, { immediate: true })
 
 onMounted(() => {
+  loadMatchOptions()
   loadTableData()
 })
 </script>
 
 <style scoped>
-.match-list-container {
+.season-list-container {
   width: 100%;
 }
 
@@ -656,6 +685,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .table-title {
@@ -673,36 +703,59 @@ onMounted(() => {
   gap: 12px;
 }
 
-.match-name-cell {
+.season-name-cell {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.match-avatar {
+.season-avatar {
   flex-shrink: 0;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
-.match-avatar-default {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.season-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.match-name-text {
+.season-name {
   font-weight: 500;
   color: #303133;
 }
 
-.time-cell {
+.season-year {
+  font-size: 12px;
+  color: #909399;
+}
+
+.round-info {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  color: #606266;
-  font-size: 13px;
 }
 
-.time-icon {
+.current-round {
+  font-size: 14px;
+  font-weight: 600;
+  color: #409eff;
+}
+
+.round-divider {
   color: #909399;
+}
+
+.total-rounds {
+  font-size: 14px;
+  color: #606266;
+}
+
+.detail-round {
+  font-size: 16px;
+  font-weight: 600;
+  color: #409eff;
 }
 
 .pagination {

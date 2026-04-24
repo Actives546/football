@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.football.mapper.SeasonMapper">
+
+    <resultMap id="BaseResultMap" type="com.football.vo.SeasonVO">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="match_id" property="matchId" jdbcType="BIGINT"/>
+        <result column="match_name" property="matchName" jdbcType="VARCHAR"/>
+        <result column="season_name" property="seasonName" jdbcType="VARCHAR"/>
+        <result column="season_year" property="seasonYear" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="start_date" property="startDate" jdbcType="DATE"/>
+        <result column="end_date" property="endDate" jdbcType="DATE"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="total_rounds" property="totalRounds" jdbcType="INTEGER"/>
+        <result column="current_round" property="currentRound" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        s.id, s.match_id, m.match_name, s.season_name, s.season_year, s.status,
+        s.start_date, s.end_date, s.description, s.total_rounds, s.current_round,
+        s.create_time, s.update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `season` s
+        LEFT JOIN `match` m ON s.match_id = m.id AND m.deleted = 0
+        WHERE s.id = #{id} AND s.deleted = 0
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `season` s
+        LEFT JOIN `match` m ON s.match_id = m.id AND m.deleted = 0
+        WHERE s.deleted = 0
+        <if test="query.matchId != null">
+            AND s.match_id = #{query.matchId}
+        </if>
+        <if test="query.seasonName != null and query.seasonName != ''">
+            AND s.season_name LIKE CONCAT('%', #{query.seasonName}, '%')
+        </if>
+        <if test="query.seasonYear != null and query.seasonYear != ''">
+            AND s.season_year LIKE CONCAT('%', #{query.seasonYear}, '%')
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND s.status = #{query.status}
+        </if>
+        ORDER BY s.create_time DESC
+        <if test="query.pageNum != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{query.offset}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM `season` s
+        WHERE s.deleted = 0
+        <if test="query.matchId != null">
+            AND s.match_id = #{query.matchId}
+        </if>
+        <if test="query.seasonName != null and query.seasonName != ''">
+            AND s.season_name LIKE CONCAT('%', #{query.seasonName}, '%')
+        </if>
+        <if test="query.seasonYear != null and query.seasonYear != ''">
+            AND s.season_year LIKE CONCAT('%', #{query.seasonYear}, '%')
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND s.status = #{query.status}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.football.entity.Season" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `season` (
+            match_id, season_name, season_year, status, start_date, end_date,
+            description, total_rounds, current_round, create_time, update_time, deleted
+        ) VALUES (
+            #{matchId}, #{seasonName}, #{seasonYear}, #{status}, #{startDate}, #{endDate},
+            #{description}, #{totalRounds}, #{currentRound}, NOW(), NOW(), 0
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.football.entity.Season">
+        UPDATE `season`
+        SET
+            match_id = #{matchId},
+            season_name = #{seasonName},
+            season_year = #{seasonYear},
+            status = #{status},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            description = #{description},
+            total_rounds = #{totalRounds},
+            current_round = #{currentRound},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE `season`
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE `season`
+        SET deleted = 1, update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+    <select id="selectByMatchId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `season` s
+        LEFT JOIN `match` m ON s.match_id = m.id AND m.deleted = 0
+        WHERE s.match_id = #{matchId} AND s.deleted = 0
+        ORDER BY s.start_date DESC
+    </select>
+
+</mapper>
