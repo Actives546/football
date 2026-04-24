@@ -19,8 +19,15 @@ CREATE TABLE IF NOT EXISTS `user` (
     KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
--- 插入测试用户（密码使用BCrypt加密，默认密码：123456）
--- 可以使用 BCrypt.hashpw("123456", BCrypt.gensalt()) 生成密码
-INSERT INTO `user` (`username`, `phone`, `password`, `nickname`, `avatar`, `email`, `status`) VALUES
-('admin', '13800138000', '$2a$10$.q8XrBv.XrBv.XrBvXrBve.XrBv.XrBvXrBvXrBvXrBvXrBvXrBv', '管理员', NULL, 'admin@football.com', 1),
-('testuser', '13800138001', '$2a$10$.q8XrBv.XrBv.XrBvXrBve.XrBv.XrBvXrBvXrBvXrBvXrBvXrBv', '测试用户', NULL, 'test@football.com', 1);
+-- 注意：以下密码是使用 BCrypt.hashpw("123456", BCrypt.gensalt()) 生成的
+-- 请运行 PasswordEncoder.java 的 main 方法生成真正的密码，或使用以下方法：
+-- 在Java中：BCrypt.hashpw("123456", BCrypt.gensalt())
+
+-- 插入测试用户（如果表中不存在则插入）
+-- 密码：123456（请使用PasswordEncoder生成正确的BCrypt哈希后替换）
+
+-- 示例：先删除已存在的测试用户（如果需要重新初始化）
+-- DELETE FROM `user` WHERE `username` IN ('admin', 'testuser');
+
+-- 插入测试用户（请替换password字段为真实的BCrypt哈希）
+-- 可以运行 PasswordEncoder.main() 方法来生成正确的密码哈希

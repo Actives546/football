@@ -114,7 +114,7 @@
 import { ref, reactive, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { sendSmsCode, verifyCode, loginByUsername } from '@/api/auth'
+import { sendSmsCode, verifyCode, loginByUsername, loginByPhone } from '@/api/auth'
 import { useUserStore } from '@/store'
 
 const router = useRouter()
