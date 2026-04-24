@@ -10,10 +10,10 @@
             @keyup.enter="handleSearch"
           />
         </el-form-item>
-        <el-form-item label="联赛">
+        <el-form-item label="赛事类型">
           <el-input
-            v-model="searchForm.league"
-            placeholder="请输入联赛名称"
+            v-model="searchForm.matchType"
+            placeholder="请输入赛事类型"
             clearable
             @keyup.enter="handleSearch"
           />
@@ -66,26 +66,18 @@
       >
         <el-table-column type="selection" width="50" align="center" />
         <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="matchName" label="赛事名称" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="league" label="联赛" width="120" show-overflow-tooltip />
-        <el-table-column label="对阵双方" min-width="200">
+        <el-table-column prop="matchName" label="赛事名称" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="matchType" label="赛事类型" width="120" show-overflow-tooltip />
+        <el-table-column prop="startTime" label="开始时间" width="170">
           <template #default="{ row }">
-            <div class="match-versus">
-              <span class="team home-team">{{ row.homeTeam }}</span>
-              <span class="score" v-if="row.status === 'FINISHED'">
-                {{ row.homeScore }} - {{ row.awayScore }}
-              </span>
-              <span class="vs" v-else>VS</span>
-              <span class="team away-team">{{ row.awayTeam }}</span>
-            </div>
+            {{ formatDate(row.startTime) }}
           </template>
         </el-table-column>
-        <el-table-column prop="matchTime" label="比赛时间" width="160">
+        <el-table-column prop="endTime" label="结束时间" width="170">
           <template #default="{ row }">
-            {{ formatDate(row.matchTime) }}
+            {{ formatDate(row.endTime) }}
           </template>
         </el-table-column>
-        <el-table-column prop="venue" label="场地" width="120" show-overflow-tooltip />
         <el-table-column prop="status" label="状态" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small" effect="light">
@@ -129,7 +121,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="700px"
+      width="650px"
       :close-on-click-modal="false"
       destroy-on-close
     >
@@ -147,41 +139,23 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="联赛" prop="league">
-              <el-input v-model="formData.league" placeholder="请输入联赛名称" />
+            <el-form-item label="赛事类型" prop="matchType">
+              <el-select v-model="formData.matchType" placeholder="请选择赛事类型" style="width: 100%">
+                <el-option label="足球联赛" value="足球联赛" />
+                <el-option label="杯赛" value="杯赛" />
+                <el-option label="友谊赛" value="友谊赛" />
+                <el-option label="亚冠联赛" value="亚冠联赛" />
+                <el-option label="欧冠联赛" value="欧冠联赛" />
+                <el-option label="其他" value="其他" />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="主队" prop="homeTeam">
-              <el-input v-model="formData.homeTeam" placeholder="请输入主队名称" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="客队" prop="awayTeam">
-              <el-input v-model="formData.awayTeam" placeholder="请输入客队名称" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="比赛时间" prop="matchTime">
-              <el-date-picker
-                v-model="formData.matchTime"
-                type="datetime"
-                placeholder="请选择比赛时间"
-                style="width: 100%"
-                format="YYYY-MM-DD HH:mm:ss"
-                value-format="YYYY-MM-DD HH:mm:ss"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="状态" prop="status">
-              <el-select v-model="formData.status" placeholder="请选择状态" style="width: 100%">
+            <el-form-item label="赛事状态" prop="status">
+              <el-select v-model="formData.status" placeholder="请选择赛事状态" style="width: 100%">
                 <el-option label="未开始" value="SCHEDULED" />
                 <el-option label="进行中" value="LIVE" />
                 <el-option label="已结束" value="FINISHED" />
@@ -193,72 +167,41 @@
         
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="主队得分">
-              <el-input-number
-                v-model="formData.homeScore"
-                :min="0"
-                :max="99"
-                placeholder="主队得分"
+            <el-form-item label="开始时间" prop="startTime">
+              <el-date-picker
+                v-model="formData.startTime"
+                type="datetime"
+                placeholder="请选择开始时间"
                 style="width: 100%"
+                format="YYYY-MM-DD HH:mm:ss"
+                value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="客队得分">
-              <el-input-number
-                v-model="formData.awayScore"
-                :min="0"
-                :max="99"
-                placeholder="客队得分"
+            <el-form-item label="结束时间">
+              <el-date-picker
+                v-model="formData.endTime"
+                type="datetime"
+                placeholder="请选择结束时间"
                 style="width: 100%"
+                format="YYYY-MM-DD HH:mm:ss"
+                value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
           </el-col>
         </el-row>
         
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="比赛场地">
-              <el-input v-model="formData.venue" placeholder="请输入比赛场地" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="主裁判">
-              <el-input v-model="formData.referee" placeholder="请输入主裁判" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="观众人数">
-              <el-input-number
-                v-model="formData.audience"
-                :min="0"
-                placeholder="观众人数"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="门票价格">
-              <el-input-number
-                v-model="formData.ticketPrice"
-                :min="0"
-                :precision="2"
-                placeholder="门票价格"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
+        <el-form-item label="封面图片">
+          <el-input v-model="formData.coverImage" placeholder="请输入封面图片URL（可选）" />
+        </el-form-item>
         
         <el-form-item label="赛事描述">
           <el-input
             v-model="formData.description"
             type="textarea"
-            :rows="3"
-            placeholder="请输入赛事描述"
+            :rows="4"
+            placeholder="请输入赛事描述信息（可选）"
           />
         </el-form-item>
       </el-form>
@@ -279,30 +222,22 @@
     >
       <el-descriptions :column="1" border v-if="currentMatch">
         <el-descriptions-item label="赛事名称">{{ currentMatch.matchName }}</el-descriptions-item>
-        <el-descriptions-item label="联赛">{{ currentMatch.league }}</el-descriptions-item>
-        <el-descriptions-item label="对阵双方">
-          <span style="color: #16a34a; font-weight: 600;">{{ currentMatch.homeTeam }}</span>
-          <span v-if="currentMatch.status === 'FINISHED'" style="margin: 0 12px; font-weight: 600;">
-            {{ currentMatch.homeScore }} - {{ currentMatch.awayScore }}
-          </span>
-          <span v-else style="margin: 0 12px;">VS</span>
-          <span style="color: #2563eb; font-weight: 600;">{{ currentMatch.awayTeam }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="比赛时间">{{ formatDate(currentMatch.matchTime) }}</el-descriptions-item>
-        <el-descriptions-item label="比赛场地">{{ currentMatch.venue || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="状态">
+        <el-descriptions-item label="赛事类型">{{ currentMatch.matchType }}</el-descriptions-item>
+        <el-descriptions-item label="赛事状态">
           <el-tag :type="getStatusType(currentMatch.status)" size="small">
             {{ getStatusText(currentMatch.status) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="主裁判" v-if="currentMatch.referee">{{ currentMatch.referee }}</el-descriptions-item>
-        <el-descriptions-item label="观众人数" v-if="currentMatch.audience">{{ currentMatch.audience }} 人</el-descriptions-item>
-        <el-descriptions-item label="门票价格" v-if="currentMatch.ticketPrice">
-          ¥{{ currentMatch.ticketPrice }}
+        <el-descriptions-item label="开始时间">{{ formatDate(currentMatch.startTime) }}</el-descriptions-item>
+        <el-descriptions-item label="结束时间" v-if="currentMatch.endTime">{{ formatDate(currentMatch.endTime) }}</el-descriptions-item>
+        <el-descriptions-item label="封面图片" v-if="currentMatch.coverImage">
+          <el-image :src="currentMatch.coverImage" style="width: 200px; height: 120px;" fit="cover" />
         </el-descriptions-item>
         <el-descriptions-item label="赛事描述" v-if="currentMatch.description">
           {{ currentMatch.description }}
         </el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ formatDate(currentMatch.createTime) }}</el-descriptions-item>
+        <el-descriptions-item label="更新时间">{{ formatDate(currentMatch.updateTime) }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
@@ -343,7 +278,7 @@ const formRef = ref(null)
 
 const searchForm = reactive({
   matchName: '',
-  league: '',
+  matchType: '',
   status: ''
 })
 
@@ -355,38 +290,26 @@ const pagination = reactive({
 const formData = reactive({
   id: null,
   matchName: '',
-  league: '',
-  homeTeam: '',
-  awayTeam: '',
-  matchTime: null,
-  venue: '',
+  matchType: '',
   status: 'SCHEDULED',
-  homeScore: 0,
-  awayScore: 0,
-  referee: '',
-  audience: null,
-  ticketPrice: null,
-  description: ''
+  startTime: null,
+  endTime: null,
+  description: '',
+  coverImage: ''
 })
 
 const formRules = {
   matchName: [
     { required: true, message: '请输入赛事名称', trigger: 'blur' }
   ],
-  league: [
-    { required: true, message: '请输入联赛名称', trigger: 'blur' }
-  ],
-  homeTeam: [
-    { required: true, message: '请输入主队名称', trigger: 'blur' }
-  ],
-  awayTeam: [
-    { required: true, message: '请输入客队名称', trigger: 'blur' }
-  ],
-  matchTime: [
-    { required: true, message: '请选择比赛时间', trigger: 'change' }
+  matchType: [
+    { required: true, message: '请选择赛事类型', trigger: 'change' }
   ],
   status: [
-    { required: true, message: '请选择状态', trigger: 'change' }
+    { required: true, message: '请选择赛事状态', trigger: 'change' }
+  ],
+  startTime: [
+    { required: true, message: '请选择开始时间', trigger: 'change' }
   ]
 }
 
@@ -453,7 +376,7 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchForm.matchName = ''
-  searchForm.league = ''
+  searchForm.matchType = ''
   searchForm.status = ''
   handleSearch()
 }
@@ -475,18 +398,12 @@ const handleSelectionChange = (val) => {
 const resetForm = () => {
   formData.id = null
   formData.matchName = ''
-  formData.league = ''
-  formData.homeTeam = ''
-  formData.awayTeam = ''
-  formData.matchTime = null
-  formData.venue = ''
+  formData.matchType = ''
   formData.status = 'SCHEDULED'
-  formData.homeScore = 0
-  formData.awayScore = 0
-  formData.referee = ''
-  formData.audience = null
-  formData.ticketPrice = null
+  formData.startTime = null
+  formData.endTime = null
   formData.description = ''
+  formData.coverImage = ''
 }
 
 const handleAdd = () => {
@@ -615,39 +532,6 @@ onMounted(() => {
   font-size: 16px;
   font-weight: 600;
   color: #1f2937;
-}
-
-.match-versus {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.team {
-  font-weight: 500;
-}
-
-.home-team {
-  color: #16a34a;
-}
-
-.away-team {
-  color: #2563eb;
-}
-
-.score {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1f2937;
-  padding: 2px 8px;
-  background: #f3f4f6;
-  border-radius: 4px;
-}
-
-.vs {
-  font-size: 12px;
-  color: #9ca3af;
-  font-weight: 600;
 }
 
 .pagination {
