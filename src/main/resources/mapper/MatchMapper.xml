@@ -9,7 +9,7 @@
         <result column="status" property="status" jdbcType="VARCHAR"/>
         <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
         <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
-        <result column="description" property="description" jdbcType="TEXT"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
         <result column="cover_image" property="coverImage" jdbcType="VARCHAR"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
@@ -44,7 +44,7 @@
         </if>
         ORDER BY create_time DESC
         <if test="query.pageNum != null and query.pageSize != null">
-            LIMIT #{query.pageSize} OFFSET #{(query.pageNum - 1) * query.pageSize}
+            LIMIT #{query.pageSize} OFFSET #{query.offset}
         </if>
     </select>
 
