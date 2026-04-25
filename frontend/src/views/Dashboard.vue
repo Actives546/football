@@ -69,15 +69,11 @@
             </div>
           </template>
           <el-table :data="recentMatches" style="width: 100%" v-loading="loading">
-            <el-table-column prop="matchName" label="赛事名称" min-width="150" />
-            <el-table-column prop="league" label="联赛" width="100" />
-            <el-table-column label="对阵" min-width="180">
+            <el-table-column prop="matchName" label="赛事名称" min-width="150" show-overflow-tooltip />
+            <el-table-column prop="matchType" label="赛事类型" width="100" />
+            <el-table-column prop="startTime" label="开始时间" width="160">
               <template #default="{ row }">
-                <div class="match-versus">
-                  <span class="team home-team">{{ row.homeTeam }}</span>
-                  <span class="vs">VS</span>
-                  <span class="team away-team">{{ row.awayTeam }}</span>
-                </div>
+                {{ formatDate(row.startTime) }}
               </template>
             </el-table-column>
             <el-table-column prop="status" label="状态" width="80">
@@ -196,6 +192,17 @@ const getStatusText = (status) => {
     'CANCELLED': '已取消'
   }
   return map[status] || status
+}
+
+const formatDate = (date) => {
+  if (!date) return '-'
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hours = String(d.getHours()).padStart(2, '0')
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
 const loadStats = async () => {
@@ -370,30 +377,6 @@ onMounted(() => {
 .recent-matches-card :deep(.el-card__body),
 .quick-actions-card :deep(.el-card__body) {
   padding: 20px;
-}
-
-.match-versus {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.team {
-  font-weight: 500;
-}
-
-.home-team {
-  color: #16a34a;
-}
-
-.away-team {
-  color: #2563eb;
-}
-
-.vs {
-  font-size: 12px;
-  color: #9ca3af;
-  font-weight: 600;
 }
 
 .action-card {

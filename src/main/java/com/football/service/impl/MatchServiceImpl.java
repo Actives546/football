@@ -80,12 +80,7 @@ public class MatchServiceImpl implements MatchService {
         Match match = convertToEntity(matchDTO);
 
         if (!StringUtils.hasText(match.getStatus())) {
-            LocalDateTime now = LocalDateTime.now();
-            if (match.getMatchTime().isBefore(now)) {
-                match.setStatus(STATUS_FINISHED);
-            } else {
-                match.setStatus(STATUS_SCHEDULED);
-            }
+            match.setStatus(STATUS_SCHEDULED);
         }
 
         int rows = matchMapper.insert(match);
@@ -151,17 +146,14 @@ public class MatchServiceImpl implements MatchService {
         if (!StringUtils.hasText(matchDTO.getMatchName())) {
             throw new BusinessException("赛事名称不能为空");
         }
-        if (!StringUtils.hasText(matchDTO.getLeague())) {
-            throw new BusinessException("联赛名称不能为空");
+        if (!StringUtils.hasText(matchDTO.getMatchType())) {
+            throw new BusinessException("赛事类型不能为空");
         }
-        if (!StringUtils.hasText(matchDTO.getHomeTeam())) {
-            throw new BusinessException("主队名称不能为空");
+        if (!StringUtils.hasText(matchDTO.getStatus())) {
+            throw new BusinessException("赛事状态不能为空");
         }
-        if (!StringUtils.hasText(matchDTO.getAwayTeam())) {
-            throw new BusinessException("客队名称不能为空");
-        }
-        if (matchDTO.getMatchTime() == null) {
-            throw new BusinessException("比赛时间不能为空");
+        if (matchDTO.getStartTime() == null) {
+            throw new BusinessException("比赛开始时间不能为空");
         }
     }
 

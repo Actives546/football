@@ -9,11 +9,7 @@ public class MatchQueryDTO {
 
     private String matchName;
 
-    private String league;
-
-    private String homeTeam;
-
-    private String awayTeam;
+    private String matchType;
 
     private String status;
 
