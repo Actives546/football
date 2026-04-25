@@ -21,7 +21,6 @@
                   v-model="phoneForm.phone" 
                   placeholder="请输入手机号" 
                   prefix-icon="Phone"
-                  size="large"
                   class="login-input"
                 />
               </el-form-item>
@@ -31,8 +30,7 @@
                   v-model="phoneForm.code" 
                   placeholder="请输入验证码" 
                   prefix-icon="Key"
-                  size="large"
-                  class="login-input"
+                  class="login-input code-input-group"
                 >
                   <template #append>
                     <el-button
@@ -73,7 +71,6 @@
                   v-model="usernameForm.username" 
                   placeholder="请输入用户名" 
                   prefix-icon="User"
-                  size="large"
                   class="login-input"
                 />
               </el-form-item>
@@ -84,7 +81,6 @@
                   type="password"
                   placeholder="请输入密码" 
                   prefix-icon="Lock"
-                  size="large"
                   class="login-input"
                   show-password
                   @keyup.enter="handleUsernameLogin"
@@ -401,73 +397,83 @@ onUnmounted(() => {
 }
 
 .login-input {
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .login-input :deep(.el-input__wrapper) {
-  border-radius: 12px;
-  padding: 12px 16px;
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #fafbfc;
+  border: 1px solid #e5e7eb;
   box-shadow: none;
   transition: all 0.2s ease;
 }
 
 .login-input :deep(.el-input__wrapper:hover) {
-  border-color: #cbd5e1;
+  border-color: #d1d5db;
   background: #ffffff;
 }
 
 .login-input :deep(.el-input__wrapper.is-focus) {
   border-color: #16a34a;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.08);
+  box-shadow: none;
 }
 
 .login-input :deep(.el-input__inner) {
-  font-size: 15px;
-  color: #1e293b;
+  font-size: 14px;
+  color: #374151;
 }
 
 .login-input :deep(.el-input__inner::placeholder) {
-  color: #94a3b8;
+  color: #9ca3af;
 }
 
 .login-input :deep(.el-input__prefix-inner) {
-  color: #94a3b8;
-  margin-right: 8px;
+  color: #9ca3af;
+  margin-right: 6px;
 }
 
 .login-input :deep(.el-input__wrapper.is-focus .el-input__prefix-inner) {
   color: #16a34a;
 }
 
-.login-input :deep(.el-input-group__append) {
+.code-input-group :deep(.el-input-group__append) {
   background: transparent;
   border: none;
-  padding: 0 0 0 12px;
+  padding: 0 0 0 8px;
+}
+
+.code-input-group :deep(.el-input__wrapper) {
+  border-radius: 8px 0 0 8px;
+}
+
+.code-input-group :deep(.el-input-group__append .el-button) {
+  border-radius: 0 8px 8px 0;
 }
 
 .code-button {
-  border-radius: 10px;
-  height: 48px;
-  padding: 0 16px;
-  font-size: 14px;
-  font-weight: 600;
-  background: #eff6ff;
-  border: none;
-  color: #2563eb;
+  border-radius: 8px;
+  height: 38px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
   transition: all 0.2s ease;
 }
 
 .code-button:hover:not(:disabled) {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
 }
 
 .code-button:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
 }
 
 .login-button {
