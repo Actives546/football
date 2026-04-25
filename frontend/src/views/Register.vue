@@ -381,6 +381,7 @@ onUnmounted(() => {
 .code-input-group :deep(.el-input__wrapper) {
   border-radius: 8px 0 0 8px;
   border-right: none;
+  padding: 6px 12px;
 }
 
 .code-input-group :deep(.el-input__wrapper.is-focus) {
@@ -395,14 +396,15 @@ onUnmounted(() => {
   border-radius: 0 8px 8px 0;
   border-left: none;
   margin: 0;
+  padding: 0;
 }
 
 .code-button {
   border-radius: 0 8px 8px 0;
-  height: 38px;
-  min-width: 100px;
-  padding: 0 16px;
-  font-size: 13px;
+  height: 36px;
+  min-width: 90px;
+  padding: 0 12px;
+  font-size: 12px;
   font-weight: 500;
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
