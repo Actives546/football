@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.football.mapper.MatchMapper">
+
+    <resultMap id="BaseResultMap" type="com.football.entity.Match">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="match_name" property="matchName" jdbcType="VARCHAR"/>
+        <result column="league" property="league" jdbcType="VARCHAR"/>
+        <result column="home_team" property="homeTeam" jdbcType="VARCHAR"/>
+        <result column="away_team" property="awayTeam" jdbcType="VARCHAR"/>
+        <result column="match_time" property="matchTime" jdbcType="TIMESTAMP"/>
+        <result column="venue" property="venue" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="home_score" property="homeScore" jdbcType="INTEGER"/>
+        <result column="away_score" property="awayScore" jdbcType="INTEGER"/>
+        <result column="referee" property="referee" jdbcType="VARCHAR"/>
+        <result column="audience" property="audience" jdbcType="INTEGER"/>
+        <result column="ticket_price" property="ticketPrice" jdbcType="DECIMAL"/>
+        <result column="description" property="description" jdbcType="TEXT"/>
+        <result column="cover_image" property="coverImage" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="deleted" property="deleted" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, match_name, league, home_team, away_team, match_time, venue, status,
+        home_score, away_score, referee, audience, ticket_price, description,
+        cover_image, create_time, update_time, deleted
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `match`
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `match`
+        WHERE deleted = 0
+        <if test="query.matchName != null and query.matchName != ''">
+            AND match_name LIKE CONCAT('%', #{query.matchName}, '%')
+        </if>
+        <if test="query.league != null and query.league != ''">
+            AND league LIKE CONCAT('%', #{query.league}, '%')
+        </if>
+        <if test="query.homeTeam != null and query.homeTeam != ''">
+            AND home_team LIKE CONCAT('%', #{query.homeTeam}, '%')
+        </if>
+        <if test="query.awayTeam != null and query.awayTeam != ''">
+            AND away_team LIKE CONCAT('%', #{query.awayTeam}, '%')
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND status = #{query.status}
+        </if>
+        <if test="query.startTime != null">
+            AND match_time >= #{query.startTime}
+        </if>
+        <if test="query.endTime != null">
+            AND match_time <= #{query.endTime}
+        </if>
+        ORDER BY match_time DESC
+        <if test="query.pageNum != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{(query.pageNum - 1) * query.pageSize}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM `match`
+        WHERE deleted = 0
+        <if test="query.matchName != null and query.matchName != ''">
+            AND match_name LIKE CONCAT('%', #{query.matchName}, '%')
+        </if>
+        <if test="query.league != null and query.league != ''">
+            AND league LIKE CONCAT('%', #{query.league}, '%')
+        </if>
+        <if test="query.homeTeam != null and query.homeTeam != ''">
+            AND home_team LIKE CONCAT('%', #{query.homeTeam}, '%')
+        </if>
+        <if test="query.awayTeam != null and query.awayTeam != ''">
+            AND away_team LIKE CONCAT('%', #{query.awayTeam}, '%')
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND status = #{query.status}
+        </if>
+        <if test="query.startTime != null">
+            AND match_time >= #{query.startTime}
+        </if>
+        <if test="query.endTime != null">
+            AND match_time <= #{query.endTime}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.football.entity.Match" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `match` (
+            match_name, league, home_team, away_team, match_time, venue, status,
+            home_score, away_score, referee, audience, ticket_price, description,
+            cover_image, create_time, update_time, deleted
+        ) VALUES (
+            #{matchName}, #{league}, #{homeTeam}, #{awayTeam}, #{matchTime}, #{venue}, #{status},
+            #{homeScore}, #{awayScore}, #{referee}, #{audience}, #{ticketPrice}, #{description},
+            #{coverImage}, NOW(), NOW(), 0
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.football.entity.Match">
+        UPDATE `match`
+        SET
+            match_name = #{matchName},
+            league = #{league},
+            home_team = #{homeTeam},
+            away_team = #{awayTeam},
+            match_time = #{matchTime},
+            venue = #{venue},
+            status = #{status},
+            home_score = #{homeScore},
+            away_score = #{awayScore},
+            referee = #{referee},
+            audience = #{audience},
+            ticket_price = #{ticketPrice},
+            description = #{description},
+            cover_image = #{coverImage},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE `match`
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE `match`
+        SET deleted = 1, update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+</mapper>

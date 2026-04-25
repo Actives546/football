@@ -1,22 +1,42 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/store'
+
+const Layout = () => import('@/components/Layout.vue')
+const Dashboard = () => import('@/views/Dashboard.vue')
+const MatchList = () => import('@/views/MatchList.vue')
+const Login = () => import('@/views/Login.vue')
+const Register = () => import('@/views/Register.vue')
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('@/views/Home.vue'),
-    meta: { title: '首页' }
+    component: Layout,
+    redirect: '/dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        name: 'Dashboard',
+        component: Dashboard,
+        meta: { title: '首页', requiresAuth: true }
+      },
+      {
+        path: 'match/list',
+        name: 'MatchList',
+        component: MatchList,
+        meta: { title: '赛事信息', requiresAuth: true }
+      }
+    ]
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/Login.vue'),
+    component: Login,
     meta: { title: '登录' }
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import('@/views/Register.vue'),
+    component: Register,
     meta: { title: '注册' }
   }
 ]
@@ -28,7 +48,16 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   document.title = to.meta.title || '足球赛事系统'
-  next()
+  
+  const userStore = useUserStore()
+  
+  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
+    next('/login')
+  } else if ((to.path === '/login' || to.path === '/register') && userStore.isLoggedIn) {
+    next('/dashboard')
+  } else {
+    next()
+  }
 })
 
 export default router
