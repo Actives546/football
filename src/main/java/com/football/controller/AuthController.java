@@ -2,6 +2,7 @@ package com.football.controller;
 
 import com.football.common.Result;
 import com.football.dto.LoginDTO;
+import com.football.dto.RegisterDTO;
 import com.football.dto.SendCodeDTO;
 import com.football.service.AuthService;
 import com.football.vo.LoginVO;
@@ -34,5 +35,11 @@ public class AuthController {
     public Result<LoginVO> login(@Valid @RequestBody LoginDTO loginDTO) {
         // 调用Service层的登录方法
         return authService.login(loginDTO);
+    }
+
+    @PostMapping("/register")
+    public Result<Boolean> register(@Valid @RequestBody RegisterDTO registerDTO) {
+        // 调用Service层的注册方法
+        return authService.register(registerDTO);
     }
 }

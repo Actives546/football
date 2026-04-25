@@ -56,6 +56,11 @@
                   登录
                 </el-button>
               </el-form-item>
+              
+              <div class="register-link">
+                <span>还没有账户？</span>
+                <router-link to="/register" class="text-link">立即注册</router-link>
+              </div>
             </el-form>
           </el-tab-pane>
           
@@ -98,6 +103,11 @@
                   登录
                 </el-button>
               </el-form-item>
+              
+              <div class="register-link">
+                <span>还没有账户？</span>
+                <router-link to="/register" class="text-link">立即注册</router-link>
+              </div>
             </el-form>
           </el-tab-pane>
         </el-tabs>
@@ -579,6 +589,25 @@ onUnmounted(() => {
 
 .login-button :deep(.el-loading-text) {
   color: #ffffff;
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.text-link {
+  color: #16a34a;
+  text-decoration: none;
+  margin-left: 4px;
+  transition: color 0.2s ease;
+}
+
+.text-link:hover {
+  color: #15803d;
+  text-decoration: underline;
 }
 
 .login-footer {
