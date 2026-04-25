@@ -441,27 +441,42 @@ onUnmounted(() => {
 .code-input-group :deep(.el-input-group__append) {
   background: transparent;
   border: none;
-  padding: 0 0 0 8px;
+  padding: 0;
+  margin: 0;
 }
 
 .code-input-group :deep(.el-input__wrapper) {
   border-radius: 8px 0 0 8px;
+  border-right: none;
+}
+
+.code-input-group :deep(.el-input__wrapper.is-focus) {
+  border-right: none;
+}
+
+.code-input-group :deep(.el-input__wrapper:hover) {
+  border-right: none;
 }
 
 .code-input-group :deep(.el-input-group__append .el-button) {
   border-radius: 0 8px 8px 0;
+  border-left: none;
+  margin: 0;
 }
 
 .code-button {
-  border-radius: 8px;
+  border-radius: 0 8px 8px 0;
   height: 38px;
-  padding: 0 12px;
+  min-width: 100px;
+  padding: 0 16px;
   font-size: 13px;
   font-weight: 500;
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
+  border-left: none;
   color: #16a34a;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .code-button:hover:not(:disabled) {
