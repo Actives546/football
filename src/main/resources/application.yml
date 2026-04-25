@@ -48,3 +48,6 @@ football:
   verify-code:
     expire-time: 300
     length: 6
+  jwt:
+    secret: football-system-jwt-secret-key-2024-very-long-secret-key-for-security
+    expiration: 86400000
