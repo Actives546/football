@@ -28,8 +28,4 @@ public class SeasonDTO {
     private LocalDate endDate;
 
     private String description;
-
-    private Integer totalRounds;
-
-    private Integer currentRound;
 }

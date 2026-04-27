@@ -26,10 +26,6 @@ public class SeasonVO {
 
     private String description;
 
-    private Integer totalRounds;
-
-    private Integer currentRound;
-
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
