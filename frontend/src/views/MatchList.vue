@@ -3,36 +3,42 @@
     <el-card class="search-card" shadow="hover">
       <el-form :model="searchForm" label-width="80px" class="search-form">
         <div class="search-row">
-          <el-form-item label="赛事名称" class="search-item">
-            <el-input
-              v-model="searchForm.matchName"
-              placeholder="请输入赛事名称"
-              clearable
-              @keyup.enter="handleSearch"
-              class="search-input"
-            />
-          </el-form-item>
-          <el-form-item label="赛事类型" class="search-item">
-            <el-select
-              v-model="searchForm.matchType"
-              placeholder="请选择赛事类型"
-              clearable
-              class="search-select"
-              @change="handleSearch"
-            >
-              <el-option label="足球联赛" value="足球联赛" />
-              <el-option label="杯赛" value="杯赛" />
-              <el-option label="友谊赛" value="友谊赛" />
-              <el-option label="亚冠联赛" value="亚冠联赛" />
-              <el-option label="欧冠联赛" value="欧冠联赛" />
-              <el-option label="其他" value="其他" />
-            </el-select>
-          </el-form-item>
-          <div class="search-buttons">
+          <div class="search-item">
+            <el-form-item label="赛事名称" class="form-item">
+              <el-input
+                v-model="searchForm.matchName"
+                placeholder="请输入赛事名称"
+                clearable
+                @keyup.enter="handleSearch"
+                class="search-input"
+              />
+            </el-form-item>
+          </div>
+          <div class="search-item">
+            <el-form-item label="赛事类型" class="form-item">
+              <el-select
+                v-model="searchForm.matchType"
+                placeholder="请选择赛事类型"
+                clearable
+                class="search-select"
+                @change="handleSearch"
+              >
+                <el-option label="足球联赛" value="足球联赛" />
+                <el-option label="杯赛" value="杯赛" />
+                <el-option label="友谊赛" value="友谊赛" />
+                <el-option label="亚冠联赛" value="亚冠联赛" />
+                <el-option label="欧冠联赛" value="欧冠联赛" />
+                <el-option label="其他" value="其他" />
+              </el-select>
+            </el-form-item>
+          </div>
+          <div class="search-item">
             <el-button type="primary" @click="handleSearch" class="search-btn">
               <el-icon><Search /></el-icon>
               搜索
             </el-button>
+          </div>
+          <div class="search-item">
             <el-button @click="handleReset" class="search-btn">
               <el-icon><Refresh /></el-icon>
               重置
@@ -69,64 +75,64 @@
         style="width: 100%"
         @selection-change="handleSelectionChange"
         stripe
-        :header-cell-style="{ backgroundColor: '#f8fafc', color: '#475569', fontWeight: 600, fontSize: '14px' }"
-        :cell-style="{ padding: '14px 0' }"
+        :header-cell-style="{ backgroundColor: '#f8fafc', color: '#475569', fontWeight: 600, fontSize: '14px', padding: '12px 0' }"
+        :cell-style="{ padding: '10px 0' }"
       >
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="序号" width="80" align="center">
+        <el-table-column type="selection" width="50" align="center" />
+        <el-table-column label="序号" width="70" align="center">
           <template #default="{ $index }">
             <span class="index-text">{{ getIndex($index) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="matchName" label="赛事名称" min-width="200" show-overflow-tooltip>
+        <el-table-column prop="matchName" label="赛事名称" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="match-name-cell">
-              <el-avatar :size="40" class="match-avatar" v-if="row.coverImage">
+              <el-avatar :size="32" class="match-avatar" v-if="row.coverImage">
                 <img :src="row.coverImage" />
               </el-avatar>
-              <el-avatar :size="40" class="match-avatar match-avatar-default" v-else>
-                <el-icon :size="20"><Trophy /></el-icon>
+              <el-avatar :size="32" class="match-avatar match-avatar-default" v-else>
+                <el-icon :size="16"><Trophy /></el-icon>
               </el-avatar>
               <span class="match-name-text">{{ row.matchName }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="matchType" label="赛事类型" width="120" align="center">
+        <el-table-column prop="matchType" label="赛事类型" width="100" align="center">
           <template #default="{ row }">
             <el-tag size="small" effect="light" :type="getMatchTypeTagType(row.matchType)">
               {{ row.matchType }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="赛事描述" min-width="180" show-overflow-tooltip>
+        <el-table-column prop="description" label="赛事描述" min-width="120" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="desc-text">{{ row.description || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" align="center">
+        <el-table-column prop="createTime" label="创建时间" width="160" align="center">
           <template #default="{ row }">
             <span class="time-text">{{ formatDate(row.createTime) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-tooltip content="查看赛季" placement="top">
-              <el-button type="success" link @click="handleViewSeasons(row)">
+              <el-button type="success" link size="small" @click="handleViewSeasons(row)">
                 <el-icon><Calendar /></el-icon>
               </el-button>
             </el-tooltip>
             <el-tooltip content="查看" placement="top">
-              <el-button type="primary" link @click="handleView(row)">
+              <el-button type="primary" link size="small" @click="handleView(row)">
                 <el-icon><View /></el-icon>
               </el-button>
             </el-tooltip>
             <el-tooltip content="编辑" placement="top">
-              <el-button type="primary" link @click="handleEdit(row)">
+              <el-button type="primary" link size="small" @click="handleEdit(row)">
                 <el-icon><Edit /></el-icon>
               </el-button>
             </el-tooltip>
             <el-tooltip content="删除" placement="top">
-              <el-button type="danger" link @click="handleDelete(row)">
+              <el-button type="danger" link size="small" @click="handleDelete(row)">
                 <el-icon><Delete /></el-icon>
               </el-button>
             </el-tooltip>
@@ -140,7 +146,7 @@
         v-if="total > 0"
         class="pagination"
         :current-page="pagination.pageNum"
-        :page-sizes="[10, 20, 50, 100]"
+        :page-sizes="[10, 20, 50]"
         :page-size="pagination.pageSize"
         :total="total"
         layout="total, sizes, prev, pager, next, jumper"
@@ -577,29 +583,29 @@ onMounted(() => {
 .search-row {
   display: flex;
   align-items: flex-end;
-  gap: 20px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
 .search-item {
+  display: flex;
+  align-items: flex-end;
   margin-bottom: 0;
   flex: 0 0 auto;
 }
 
-.search-item :deep(.el-form-item__label) {
+.form-item {
+  margin-bottom: 0;
+}
+
+.form-item :deep(.el-form-item__label) {
   font-weight: 500;
   color: #475569;
 }
 
 .search-input,
 .search-select {
-  width: 220px;
-}
-
-.search-buttons {
-  display: flex;
-  gap: 12px;
-  margin-left: auto;
+  width: 200px;
 }
 
 .search-btn {
@@ -607,6 +613,7 @@ onMounted(() => {
   border-radius: 8px;
   font-weight: 500;
   transition: all 0.3s ease;
+  margin-bottom: 2px;
 }
 
 .search-btn:hover {
