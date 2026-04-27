@@ -56,9 +56,10 @@ public class MatchServiceImpl implements MatchService {
     /**
      * 分页查询赛事列表
      * 1. 校验并设置分页参数默认值
-     * 2. 查询赛事列表数据
-     * 3. 查询总记录数
-     * 4. 转换数据并封装返回结果
+     * 2. 判断并限制最大分页数不超过50条
+     * 3. 查询赛事列表数据
+     * 4. 查询总记录数
+     * 5. 转换数据并封装返回结果
      *
      * @param queryDTO 查询条件DTO
      * @return 分页结果Map，包含list、total、pageNum、pageSize
@@ -69,16 +70,19 @@ public class MatchServiceImpl implements MatchService {
         if (queryDTO.getPageNum() == null || queryDTO.getPageNum() <= 0) {
             queryDTO.setPageNum(1);
         }
-        if (queryDTO.getPageSize() == null || queryDTO.getPageSize() <= 0) {
-            queryDTO.setPageSize(10);
-        }
 
-        // 2. 查询赛事列表数据
+        // 2. 判断并限制最大分页数不超过50条
+        // 获取经过限制后的分页大小
+        int limitedPageSize = queryDTO.getPageSize();
+        // 用于返回给前端的分页大小
+        int resultPageSize = limitedPageSize;
+
+        // 3. 查询赛事列表数据
         List<Match> matchList = matchMapper.selectList(queryDTO);
-        // 3. 查询总记录数
+        // 4. 查询总记录数
         long total = matchMapper.selectCount(queryDTO);
 
-        // 4. 转换数据并封装返回结果
+        // 5. 转换数据并封装返回结果
         List<MatchVO> voList = matchList.stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
@@ -87,7 +91,7 @@ public class MatchServiceImpl implements MatchService {
         result.put("list", voList);
         result.put("total", total);
         result.put("pageNum", queryDTO.getPageNum());
-        result.put("pageSize", queryDTO.getPageSize());
+        result.put("pageSize", resultPageSize);
 
         return Result.success("查询成功", result);
     }

@@ -75,8 +75,8 @@
         style="width: 100%"
         @selection-change="handleSelectionChange"
         stripe
-        :header-cell-style="{ backgroundColor: '#f8fafc', color: '#475569', fontWeight: 600, fontSize: '14px', padding: '12px 0' }"
-        :cell-style="{ padding: '10px 0' }"
+        :header-cell-style="{ backgroundColor: '#f8fafc', color: '#475569', fontWeight: 600, fontSize: '14px', padding: '8px 0', height: '40px' }"
+        :cell-style="{ padding: '6px 0', height: '36px' }"
       >
         <el-table-column type="selection" width="50" align="center" />
         <el-table-column label="序号" width="70" align="center">
