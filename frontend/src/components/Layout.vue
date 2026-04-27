@@ -25,6 +25,11 @@
           <template #title>首页</template>
         </el-menu-item>
         
+        <el-menu-item index="/organization/list">
+          <el-icon><OfficeBuilding /></el-icon>
+          <template #title>机构管理</template>
+        </el-menu-item>
+        
         <el-sub-menu index="match">
           <template #title>
             <el-icon><Trophy /></el-icon>
@@ -110,7 +115,8 @@ import {
   User,
   ArrowDown,
   SwitchButton,
-  Football
+  Football,
+  OfficeBuilding
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
