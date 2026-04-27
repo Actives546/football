@@ -34,42 +34,24 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public Result<PersonVO> getById(Long id) {
-        if (id == null) {
-            throw new BusinessException("人员ID不能为空");
-        }
-        PersonVO personVO = personMapper.selectById(id);
-        if (personVO == null) {
-            throw new BusinessException("人员不存在");
-        }
+        PersonVO personVO = validateAndGetPerson(id);
         return Result.success("查询成功", personVO);
     }
 
     @Override
     public Result<Map<String, Object>> getPage(PersonQueryDTO queryDTO) {
-        if (queryDTO.getPageNum() == null || queryDTO.getPageNum() <= 0) {
-            queryDTO.setPageNum(1);
-        }
-        if (queryDTO.getPageSize() == null || queryDTO.getPageSize() <= 0) {
-            queryDTO.setPageSize(10);
-        }
+        validatePaginationParams(queryDTO);
 
         List<PersonVO> personList = personMapper.selectList(queryDTO);
         long total = personMapper.selectCount(queryDTO);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("list", personList);
-        result.put("total", total);
-        result.put("pageNum", queryDTO.getPageNum());
-        result.put("pageSize", queryDTO.getPageSize());
-
-        return Result.success("查询成功", result);
+        return Result.success("查询成功", buildPageResult(queryDTO, personList, total));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> add(PersonDTO personDTO) {
-        validatePersonDTO(personDTO);
-        validateOrgExist(personDTO.getOrgId());
+        validatePersonData(personDTO);
 
         Person person = convertToEntity(personDTO);
 
@@ -82,17 +64,9 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> update(PersonDTO personDTO) {
-        if (personDTO.getId() == null) {
-            throw new BusinessException("人员ID不能为空");
-        }
+        PersonVO existPerson = validateAndGetPerson(personDTO.getId());
 
-        PersonVO existPerson = personMapper.selectById(personDTO.getId());
-        if (existPerson == null) {
-            throw new BusinessException("人员不存在");
-        }
-
-        validatePersonDTO(personDTO);
-        validateOrgExist(personDTO.getOrgId());
+        validatePersonData(personDTO);
 
         Person person = convertToEntity(personDTO);
 
@@ -105,14 +79,7 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> delete(Long id) {
-        if (id == null) {
-            throw new BusinessException("人员ID不能为空");
-        }
-
-        PersonVO person = personMapper.selectById(id);
-        if (person == null) {
-            throw new BusinessException("人员不存在");
-        }
+        PersonVO person = validateAndGetPerson(id);
 
         int rows = personMapper.deleteById(id);
         log.info("删除人员成功，人员ID：{}，人员名称：{}", id, person.getPersonName());
@@ -140,6 +107,40 @@ public class PersonServiceImpl implements PersonService {
         }
         List<PersonVO> list = personMapper.selectByOrgId(orgId);
         return Result.success("查询成功", list);
+    }
+
+    private PersonVO validateAndGetPerson(Long id) {
+        if (id == null) {
+            throw new BusinessException("人员ID不能为空");
+        }
+        PersonVO person = personMapper.selectById(id);
+        if (person == null) {
+            throw new BusinessException("人员不存在");
+        }
+        return person;
+    }
+
+    private void validatePaginationParams(PersonQueryDTO queryDTO) {
+        if (queryDTO.getPageNum() == null || queryDTO.getPageNum() <= 0) {
+            queryDTO.setPageNum(1);
+        }
+        if (queryDTO.getPageSize() == null || queryDTO.getPageSize() <= 0) {
+            queryDTO.setPageSize(10);
+        }
+    }
+
+    private void validatePersonData(PersonDTO personDTO) {
+        validatePersonDTO(personDTO);
+        validateOrgExist(personDTO.getOrgId());
+    }
+
+    private Map<String, Object> buildPageResult(PersonQueryDTO queryDTO, List<PersonVO> list, long total) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("total", total);
+        result.put("pageNum", queryDTO.getPageNum());
+        result.put("pageSize", queryDTO.getPageSize());
+        return result;
     }
 
     private void validatePersonDTO(PersonDTO personDTO) {
