@@ -5,6 +5,7 @@ const Layout = () => import('@/components/Layout.vue')
 const Dashboard = () => import('@/views/Dashboard.vue')
 const MatchList = () => import('@/views/MatchList.vue')
 const SeasonList = () => import('@/views/SeasonList.vue')
+const OrganizationList = () => import('@/views/OrganizationList.vue')
 const Login = () => import('@/views/Login.vue')
 const Register = () => import('@/views/Register.vue')
 
@@ -19,6 +20,12 @@ const routes = [
         name: 'Dashboard',
         component: Dashboard,
         meta: { title: '首页', requiresAuth: true }
+      },
+      {
+        path: 'organization/list',
+        name: 'OrganizationList',
+        component: OrganizationList,
+        meta: { title: '机构管理', requiresAuth: true }
       },
       {
         path: 'match/list',

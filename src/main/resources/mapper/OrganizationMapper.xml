@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.football.mapper.OrganizationMapper">
+
+    <resultMap id="BaseResultMap" type="com.football.vo.OrganizationVO">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="org_name" property="orgName" jdbcType="VARCHAR"/>
+        <result column="org_type" property="orgType" jdbcType="VARCHAR"/>
+        <result column="org_short_name" property="orgShortName" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="parent_id" property="parentId" jdbcType="BIGINT"/>
+        <result column="parent_name" property="parentName" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        o.id, o.org_name, o.org_type, o.org_short_name, o.description, 
+        o.parent_id, p.org_name AS parent_name, o.create_time, o.update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `organization` o
+        LEFT JOIN `organization` p ON o.parent_id = p.id AND p.deleted = 0
+        WHERE o.id = #{id} AND o.deleted = 0
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `organization` o
+        LEFT JOIN `organization` p ON o.parent_id = p.id AND p.deleted = 0
+        WHERE o.deleted = 0
+        <if test="query.orgName != null and query.orgName != ''">
+            AND o.org_name LIKE CONCAT('%', #{query.orgName}, '%')
+        </if>
+        <if test="query.orgType != null and query.orgType != ''">
+            AND o.org_type = #{query.orgType}
+        </if>
+        <if test="query.parentId != null">
+            AND o.parent_id = #{query.parentId}
+        </if>
+        ORDER BY o.create_time DESC
+        <if test="query.pageNum != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{query.offset}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM `organization` o
+        WHERE o.deleted = 0
+        <if test="query.orgName != null and query.orgName != ''">
+            AND o.org_name LIKE CONCAT('%', #{query.orgName}, '%')
+        </if>
+        <if test="query.orgType != null and query.orgType != ''">
+            AND o.org_type = #{query.orgType}
+        </if>
+        <if test="query.parentId != null">
+            AND o.parent_id = #{query.parentId}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.football.entity.Organization" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `organization` (
+            org_name, org_type, org_short_name, description, parent_id,
+            create_time, update_time, deleted
+        ) VALUES (
+            #{orgName}, #{orgType}, #{orgShortName}, #{description}, #{parentId},
+            NOW(), NOW(), 0
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.football.entity.Organization">
+        UPDATE `organization`
+        SET
+            org_name = #{orgName},
+            org_type = #{orgType},
+            org_short_name = #{orgShortName},
+            description = #{description},
+            parent_id = #{parentId},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE `organization`
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE `organization`
+        SET deleted = 1, update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+    <select id="selectChildren" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `organization` o
+        LEFT JOIN `organization` p ON o.parent_id = p.id AND p.deleted = 0
+        WHERE o.parent_id = #{parentId} AND o.deleted = 0
+        ORDER BY o.create_time DESC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `organization` o
+        LEFT JOIN `organization` p ON o.parent_id = p.id AND p.deleted = 0
+        WHERE o.deleted = 0
+        ORDER BY o.create_time DESC
+    </select>
+
+    <select id="selectChildrenCount" resultType="int">
+        SELECT COUNT(*)
+        FROM `organization`
+        WHERE parent_id = #{parentId} AND deleted = 0
+    </select>
+
+</mapper>
