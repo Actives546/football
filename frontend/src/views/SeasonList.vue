@@ -125,24 +125,24 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="startDate" label="开始日期" width="120" align="center">
+        <el-table-column prop="startDate" label="开始日期" width="140" align="center">
           <template #default="{ row }">
             <span class="date-text">{{ formatDate(row.startDate) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="endDate" label="结束日期" width="120" align="center">
+        <el-table-column prop="endDate" label="结束日期" width="140" align="center">
           <template #default="{ row }">
             <span class="date-text">{{ formatDate(row.endDate) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="status" label="状态" width="120" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small" effect="dark">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center" fixed="right">
+        <el-table-column label="操作" width="200" align="center" fixed="right">
           <template #default="{ row }">
             <el-tooltip content="查看" placement="top">
               <el-button type="primary" link size="small" @click="handleView(row)">
