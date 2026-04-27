@@ -260,12 +260,12 @@
               <el-row :gutter="24">
                 <el-col :span="12">
                   <el-form-item label="人员姓名" prop="personName">
-                    <el-input v-model="formData.personName" placeholder="请输入人员姓名" class="form-input" />
+                    <el-input v-model="formData.personName" placeholder="请输入人员姓名" class="form-input" :disabled="isView" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="人员类型" prop="personType">
-                    <el-select v-model="formData.personType" placeholder="请选择人员类型" class="form-select">
+                    <el-select v-model="formData.personType" placeholder="请选择人员类型" class="form-select" :disabled="isView">
                       <el-option
                         v-for="item in personTypeOptions"
                         :key="item.value"
@@ -288,12 +288,13 @@
                       check-strictly
                       filterable
                       class="form-select"
+                      :disabled="isView"
                     />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="手机号">
-                    <el-input v-model="formData.phone" placeholder="请输入手机号" class="form-input" />
+                    <el-input v-model="formData.phone" placeholder="请输入手机号" class="form-input" :disabled="isView" />
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -301,12 +302,12 @@
               <el-row :gutter="24">
                 <el-col :span="12">
                   <el-form-item label="邮箱">
-                    <el-input v-model="formData.email" placeholder="请输入邮箱" class="form-input" />
+                    <el-input v-model="formData.email" placeholder="请输入邮箱" class="form-input" :disabled="isView" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="身份证号">
-                    <el-input v-model="formData.idCard" placeholder="请输入身份证号" class="form-input" maxlength="18" />
+                    <el-input v-model="formData.idCard" placeholder="请输入身份证号" class="form-input" maxlength="18" :disabled="isView" />
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -314,7 +315,7 @@
               <el-row :gutter="24">
                 <el-col :span="12">
                   <el-form-item label="性别">
-                    <el-radio-group v-model="formData.gender">
+                    <el-radio-group v-model="formData.gender" :disabled="isView">
                       <el-radio :value="1">男</el-radio>
                       <el-radio :value="2">女</el-radio>
                       <el-radio :value="0">未知</el-radio>
@@ -329,6 +330,7 @@
                       placeholder="请选择出生日期"
                       value-format="YYYY-MM-DD"
                       class="form-select"
+                      :disabled="isView"
                     />
                   </el-form-item>
                 </el-col>
@@ -337,7 +339,7 @@
               <el-row :gutter="24">
                 <el-col :span="12">
                   <el-form-item label="状态">
-                    <el-radio-group v-model="formData.status">
+                    <el-radio-group v-model="formData.status" :disabled="isView">
                       <el-radio :value="1">正常</el-radio>
                       <el-radio :value="0">禁用</el-radio>
                     </el-radio-group>
@@ -345,17 +347,17 @@
                 </el-col>
                 <el-col :span="12">
                   <el-form-item label="头像">
-                    <el-input v-model="formData.avatar" placeholder="请输入头像URL（可选）" class="form-input" />
+                    <el-input v-model="formData.avatar" placeholder="请输入头像URL（可选）" class="form-input" :disabled="isView" />
                   </el-form-item>
                 </el-col>
               </el-row>
               
               <el-form-item label="地址">
-                <el-input v-model="formData.address" type="textarea" :rows="2" placeholder="请输入地址（可选）" class="form-textarea" />
+                <el-input v-model="formData.address" type="textarea" :rows="2" placeholder="请输入地址（可选）" class="form-textarea" :disabled="isView" />
               </el-form-item>
               
               <el-form-item label="备注">
-                <el-input v-model="formData.remark" type="textarea" :rows="3" placeholder="请输入备注（可选）" class="form-textarea" />
+                <el-input v-model="formData.remark" type="textarea" :rows="3" placeholder="请输入备注（可选）" class="form-textarea" :disabled="isView" />
               </el-form-item>
             </el-form>
           </div>
@@ -392,63 +394,6 @@
         </div>
       </template>
     </el-dialog>
-    
-    <el-dialog
-      v-model="detailVisible"
-      title="人员详情"
-      width="600px"
-      destroy-on-close
-      class="detail-dialog"
-    >
-      <el-descriptions :column="2" border v-if="currentPerson" class="detail-descriptions">
-        <el-descriptions-item label="人员ID" :span="1">
-          <span class="detail-value">{{ currentPerson.id }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="人员类型" :span="1">
-          <el-tag :type="getPersonTypeTagType(currentPerson.personType)" size="small">
-            {{ getPersonTypeText(currentPerson.personType) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="人员姓名" :span="1">
-          <span class="detail-value">{{ currentPerson.personName }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="所属部门" :span="1">
-          <span class="detail-text">{{ currentPerson.orgName || '-' }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="手机号" :span="1">
-          <span class="detail-text">{{ currentPerson.phone || '-' }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="邮箱" :span="1">
-          <span class="detail-text">{{ currentPerson.email || '-' }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="性别" :span="1">
-          <span class="detail-text">{{ getGenderText(currentPerson.gender) }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="出生日期" :span="1">
-          <span class="detail-text">{{ currentPerson.birthday || '-' }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="身份证号" :span="1">
-          <span class="detail-text">{{ currentPerson.idCard || '-' }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="状态" :span="1">
-          <el-tag :type="currentPerson.status === 1 ? 'success' : 'danger'" size="small">
-            {{ getStatusText(currentPerson.status) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="地址" :span="2" v-if="currentPerson.address">
-          <span class="detail-text">{{ currentPerson.address }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="创建时间" :span="1">
-          <span class="detail-time">{{ formatDateTime(currentPerson.createTime) }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="更新时间" :span="1">
-          <span class="detail-time">{{ formatDateTime(currentPerson.updateTime) }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="备注" :span="2" v-if="currentPerson.remark">
-          <span class="detail-desc">{{ currentPerson.remark }}</span>
-        </el-descriptions-item>
-      </el-descriptions>
-    </el-dialog>
   </div>
 </template>
 
@@ -483,7 +428,6 @@ const loading = ref(false)
 const formLoading = ref(false)
 const submitLoading = ref(false)
 const dialogVisible = ref(false)
-const detailVisible = ref(false)
 const isView = ref(false)
 const currentPerson = ref(null)
 const multipleSelection = ref([])
@@ -738,7 +682,10 @@ const handleView = async (row) => {
     currentPerson.value = res.data
     isView.value = true
     Object.assign(formData, res.data)
-    detailVisible.value = true
+    if (res.data.birthday) {
+      formData.birthday = res.data.birthday
+    }
+    dialogVisible.value = true
   } catch (error) {
     ElMessage.error('获取详情失败')
     console.error(error)
@@ -1215,42 +1162,5 @@ onMounted(() => {
 .primary-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-}
-
-.detail-dialog :deep(.el-dialog) {
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.detail-descriptions :deep(.el-descriptions__label) {
-  font-weight: 500;
-  color: #64748b;
-  background: #f8fafc;
-}
-
-.detail-descriptions :deep(.el-descriptions__content) {
-  color: #1e293b;
-}
-
-.detail-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.detail-text {
-  font-size: 14px;
-  color: #475569;
-}
-
-.detail-time {
-  font-size: 13px;
-  color: #64748b;
-}
-
-.detail-desc {
-  font-size: 14px;
-  color: #475569;
-  line-height: 1.6;
 }
 </style>
