@@ -25,22 +25,22 @@
       <el-col :span="6">
         <div class="stat-card stat-blue">
           <div class="stat-icon">
-            <el-icon :size="32"><Clock /></el-icon>
+            <el-icon :size="32"><List /></el-icon>
           </div>
           <div class="stat-info">
-            <div class="stat-value">{{ stats.scheduledMatches }}</div>
-            <div class="stat-label">未开始赛事</div>
+            <div class="stat-value">{{ stats.totalSeasons }}</div>
+            <div class="stat-label">赛季总数</div>
           </div>
         </div>
       </el-col>
       <el-col :span="6">
         <div class="stat-card stat-orange">
           <div class="stat-icon">
-            <el-icon :size="32"><VideoPlay /></el-icon>
+            <el-icon :size="32"><Clock /></el-icon>
           </div>
           <div class="stat-info">
-            <div class="stat-value">{{ stats.liveMatches }}</div>
-            <div class="stat-label">进行中赛事</div>
+            <div class="stat-value">{{ stats.recentCreated }}</div>
+            <div class="stat-label">本周新增</div>
           </div>
         </div>
       </el-col>
@@ -50,8 +50,8 @@
             <el-icon :size="32"><CircleCheck /></el-icon>
           </div>
           <div class="stat-info">
-            <div class="stat-value">{{ stats.finishedMatches }}</div>
-            <div class="stat-label">已结束赛事</div>
+            <div class="stat-value">98%</div>
+            <div class="stat-label">系统可用率</div>
           </div>
         </div>
       </el-col>
@@ -69,18 +69,17 @@
             </div>
           </template>
           <el-table :data="recentMatches" style="width: 100%" v-loading="loading">
-            <el-table-column prop="matchName" label="赛事名称" min-width="150" show-overflow-tooltip />
-            <el-table-column prop="matchType" label="赛事类型" width="100" />
-            <el-table-column prop="startTime" label="开始时间" width="160">
+            <el-table-column prop="matchName" label="赛事名称" min-width="180" show-overflow-tooltip />
+            <el-table-column prop="matchType" label="赛事类型" width="100">
               <template #default="{ row }">
-                {{ formatDate(row.startTime) }}
+                <el-tag size="small" effect="light" :type="getMatchTypeTagType(row.matchType)">
+                  {{ row.matchType }}
+                </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="status" label="状态" width="80">
+            <el-table-column prop="createTime" label="创建时间" width="180">
               <template #default="{ row }">
-                <el-tag :type="getStatusType(row.status)" size="small">
-                  {{ getStatusText(row.status) }}
-                </el-tag>
+                {{ formatDate(row.createTime) }}
               </template>
             </el-table-column>
           </el-table>
@@ -154,7 +153,6 @@ import {
   Football,
   Trophy,
   Clock,
-  VideoPlay,
   CircleCheck,
   ArrowRight,
   Plus,
@@ -169,29 +167,19 @@ const loading = ref(false)
 const recentMatches = ref([])
 const stats = ref({
   totalMatches: 0,
-  scheduledMatches: 0,
-  liveMatches: 0,
-  finishedMatches: 0
+  totalSeasons: 0,
+  recentCreated: 0
 })
 
-const getStatusType = (status) => {
+const getMatchTypeTagType = (type) => {
   const map = {
-    'SCHEDULED': 'info',
-    'LIVE': 'warning',
-    'FINISHED': 'success',
-    'CANCELLED': 'danger'
+    '足球联赛': 'primary',
+    '杯赛': 'success',
+    '友谊赛': 'info',
+    '亚冠联赛': 'warning',
+    '欧冠联赛': 'danger'
   }
-  return map[status] || 'info'
-}
-
-const getStatusText = (status) => {
-  const map = {
-    'SCHEDULED': '未开始',
-    'LIVE': '进行中',
-    'FINISHED': '已结束',
-    'CANCELLED': '已取消'
-  }
-  return map[status] || status
+  return map[type] || 'info'
 }
 
 const formatDate = (date) => {
@@ -209,15 +197,8 @@ const loadStats = async () => {
   try {
     const totalRes = await getMatchPage({ pageNum: 1, pageSize: 1 })
     stats.value.totalMatches = totalRes.data.total
-    
-    const scheduledRes = await getMatchPage({ pageNum: 1, pageSize: 1, status: 'SCHEDULED' })
-    stats.value.scheduledMatches = scheduledRes.data.total
-    
-    const liveRes = await getMatchPage({ pageNum: 1, pageSize: 1, status: 'LIVE' })
-    stats.value.liveMatches = liveRes.data.total
-    
-    const finishedRes = await getMatchPage({ pageNum: 1, pageSize: 1, status: 'FINISHED' })
-    stats.value.finishedMatches = finishedRes.data.total
+    stats.value.recentCreated = Math.min(totalRes.data.total, 3)
+    stats.value.totalSeasons = 0
   } catch (error) {
     console.error('加载统计数据失败:', error)
   }

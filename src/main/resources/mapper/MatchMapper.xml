@@ -6,7 +6,6 @@
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="match_name" property="matchName" jdbcType="VARCHAR"/>
         <result column="match_type" property="matchType" jdbcType="VARCHAR"/>
-        <result column="status" property="status" jdbcType="VARCHAR"/>
         <result column="description" property="description" jdbcType="VARCHAR"/>
         <result column="cover_image" property="coverImage" jdbcType="VARCHAR"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
@@ -15,7 +14,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, match_name, match_type, status, description,
+        id, match_name, match_type, description,
         cover_image, create_time, update_time, deleted
     </sql>
 
@@ -37,9 +36,6 @@
         <if test="query.matchType != null and query.matchType != ''">
             AND match_type LIKE CONCAT('%', #{query.matchType}, '%')
         </if>
-        <if test="query.status != null and query.status != ''">
-            AND status = #{query.status}
-        </if>
         ORDER BY create_time DESC
         <if test="query.pageNum != null and query.pageSize != null">
             LIMIT #{query.pageSize} OFFSET #{query.offset}
@@ -56,17 +52,14 @@
         <if test="query.matchType != null and query.matchType != ''">
             AND match_type LIKE CONCAT('%', #{query.matchType}, '%')
         </if>
-        <if test="query.status != null and query.status != ''">
-            AND status = #{query.status}
-        </if>
     </select>
 
     <insert id="insert" parameterType="com.football.entity.Match" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `match` (
-            match_name, match_type, status, description,
+            match_name, match_type, description,
             cover_image, create_time, update_time, deleted
         ) VALUES (
-            #{matchName}, #{matchType}, #{status}, #{description},
+            #{matchName}, #{matchType}, #{description},
             #{coverImage}, NOW(), NOW(), 0
         )
     </insert>
@@ -76,7 +69,6 @@
         SET
             match_name = #{matchName},
             match_type = #{matchType},
-            status = #{status},
             description = #{description},
             cover_image = #{coverImage},
             update_time = NOW()

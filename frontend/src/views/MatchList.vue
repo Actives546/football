@@ -1,69 +1,48 @@
 <template>
   <div class="match-list-container">
-    <el-card class="search-card" shadow="never">
-      <el-form :model="searchForm" label-width="100px">
-        <el-row :gutter="24">
-          <el-col :xs="24" :sm="12" :md="8">
-            <el-form-item label="赛事名称">
-              <el-input
-                v-model="searchForm.matchName"
-                placeholder="请输入赛事名称"
-                clearable
-                @keyup.enter="handleSearch"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12" :md="8">
-            <el-form-item label="赛事类型">
-              <el-select
-                v-model="searchForm.matchType"
-                placeholder="请选择赛事类型"
-                clearable
-                style="width: 100%"
-                @change="handleSearch"
-              >
-                <el-option label="足球联赛" value="足球联赛" />
-                <el-option label="杯赛" value="杯赛" />
-                <el-option label="友谊赛" value="友谊赛" />
-                <el-option label="亚冠联赛" value="亚冠联赛" />
-                <el-option label="欧冠联赛" value="欧冠联赛" />
-                <el-option label="其他" value="其他" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12" :md="8">
-            <el-form-item label="赛事状态">
-              <el-select
-                v-model="searchForm.status"
-                placeholder="请选择状态"
-                clearable
-                style="width: 100%"
-                @change="handleSearch"
-              >
-                <el-option label="未开始" value="SCHEDULED" />
-                <el-option label="进行中" value="LIVE" />
-                <el-option label="已结束" value="FINISHED" />
-                <el-option label="已取消" value="CANCELLED" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24" class="search-btn-group">
-            <el-button type="primary" @click="handleSearch">
+    <el-card class="search-card" shadow="hover">
+      <el-form :model="searchForm" label-width="80px" class="search-form">
+        <div class="search-row">
+          <el-form-item label="赛事名称" class="search-item">
+            <el-input
+              v-model="searchForm.matchName"
+              placeholder="请输入赛事名称"
+              clearable
+              @keyup.enter="handleSearch"
+              class="search-input"
+            />
+          </el-form-item>
+          <el-form-item label="赛事类型" class="search-item">
+            <el-select
+              v-model="searchForm.matchType"
+              placeholder="请选择赛事类型"
+              clearable
+              class="search-select"
+              @change="handleSearch"
+            >
+              <el-option label="足球联赛" value="足球联赛" />
+              <el-option label="杯赛" value="杯赛" />
+              <el-option label="友谊赛" value="友谊赛" />
+              <el-option label="亚冠联赛" value="亚冠联赛" />
+              <el-option label="欧冠联赛" value="欧冠联赛" />
+              <el-option label="其他" value="其他" />
+            </el-select>
+          </el-form-item>
+          <div class="search-buttons">
+            <el-button type="primary" @click="handleSearch" class="search-btn">
               <el-icon><Search /></el-icon>
               搜索
             </el-button>
-            <el-button @click="handleReset">
+            <el-button @click="handleReset" class="search-btn">
               <el-icon><Refresh /></el-icon>
               重置
             </el-button>
-          </el-col>
-        </el-row>
+          </div>
+        </div>
       </el-form>
     </el-card>
     
-    <el-card class="table-card" shadow="never">
+    <el-card class="table-card" shadow="hover">
       <template #header>
         <div class="table-header">
           <div class="header-left">
@@ -90,18 +69,23 @@
         style="width: 100%"
         @selection-change="handleSelectionChange"
         stripe
-        :header-cell-style="{ backgroundColor: '#fafafa', color: '#606266', fontWeight: 600 }"
+        :header-cell-style="{ backgroundColor: '#f8fafc', color: '#475569', fontWeight: 600, fontSize: '14px' }"
+        :cell-style="{ padding: '14px 0' }"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="matchName" label="赛事名称" min-width="220" show-overflow-tooltip>
+        <el-table-column label="序号" width="80" align="center">
+          <template #default="{ $index }">
+            <span class="index-text">{{ getIndex($index) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="matchName" label="赛事名称" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="match-name-cell">
-              <el-avatar :size="36" class="match-avatar" v-if="row.coverImage">
+              <el-avatar :size="40" class="match-avatar" v-if="row.coverImage">
                 <img :src="row.coverImage" />
               </el-avatar>
-              <el-avatar :size="36" class="match-avatar match-avatar-default" v-else>
-                <el-icon :size="18"><Trophy /></el-icon>
+              <el-avatar :size="40" class="match-avatar match-avatar-default" v-else>
+                <el-icon :size="20"><Trophy /></el-icon>
               </el-avatar>
               <span class="match-name-text">{{ row.matchName }}</span>
             </div>
@@ -114,19 +98,17 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100" align="center">
-          <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)" size="small" effect="dark">
-              {{ getStatusText(row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip>
+        <el-table-column prop="description" label="赛事描述" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="desc-text">{{ row.description || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="240" align="center" fixed="right">
+        <el-table-column prop="createTime" label="创建时间" width="180" align="center">
+          <template #default="{ row }">
+            <span class="time-text">{{ formatDate(row.createTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="220" align="center" fixed="right">
           <template #default="{ row }">
             <el-tooltip content="查看赛季" placement="top">
               <el-button type="success" link @click="handleViewSeasons(row)">
@@ -170,104 +152,125 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="650px"
+      width="680px"
       :close-on-click-modal="false"
       destroy-on-close
+      class="match-dialog"
     >
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="formRules"
-        label-width="100px"
-        v-loading="formLoading"
-      >
-        <el-row :gutter="24">
-          <el-col :span="12">
-            <el-form-item label="赛事名称" prop="matchName">
-              <el-input v-model="formData.matchName" placeholder="请输入赛事名称" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="赛事类型" prop="matchType">
-              <el-select v-model="formData.matchType" placeholder="请选择赛事类型" style="width: 100%">
-                <el-option label="足球联赛" value="足球联赛" />
-                <el-option label="杯赛" value="杯赛" />
-                <el-option label="友谊赛" value="友谊赛" />
-                <el-option label="亚冠联赛" value="亚冠联赛" />
-                <el-option label="欧冠联赛" value="欧冠联赛" />
-                <el-option label="其他" value="其他" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
+      <div class="dialog-content" v-loading="formLoading">
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <el-icon :size="18"><InfoFilled /></el-icon>
+            </div>
+            <span class="section-title">基本信息</span>
+          </div>
+          <div class="section-body">
+            <el-form
+              ref="formRef"
+              :model="formData"
+              :rules="formRules"
+              label-width="100px"
+              class="match-form"
+            >
+              <el-form-item label="赛事名称" prop="matchName" class="form-item-full">
+                <el-input v-model="formData.matchName" placeholder="请输入赛事名称" class="form-input" />
+              </el-form-item>
+              
+              <el-form-item label="赛事类型" prop="matchType">
+                <el-select v-model="formData.matchType" placeholder="请选择赛事类型" class="form-select">
+                  <el-option label="足球联赛" value="足球联赛" />
+                  <el-option label="杯赛" value="杯赛" />
+                  <el-option label="友谊赛" value="友谊赛" />
+                  <el-option label="亚冠联赛" value="亚冠联赛" />
+                  <el-option label="欧冠联赛" value="欧冠联赛" />
+                  <el-option label="其他" value="其他" />
+                </el-select>
+              </el-form-item>
+              
+              <el-form-item label="封面图片">
+                <el-input v-model="formData.coverImage" placeholder="请输入封面图片URL（可选）" class="form-input">
+                  <template #append>
+                    <el-button @click="previewCoverImage">预览</el-button>
+                  </template>
+                </el-input>
+              </el-form-item>
+              
+              <el-form-item label="赛事描述">
+                <el-input
+                  v-model="formData.description"
+                  type="textarea"
+                  :rows="4"
+                  placeholder="请输入赛事描述信息（可选）"
+                  class="form-textarea"
+                />
+              </el-form-item>
+            </el-form>
+          </div>
+        </div>
         
-        <el-row :gutter="24">
-          <el-col :span="12">
-            <el-form-item label="赛事状态" prop="status">
-              <el-select v-model="formData.status" placeholder="请选择赛事状态" style="width: 100%">
-                <el-option label="未开始" value="SCHEDULED" />
-                <el-option label="进行中" value="LIVE" />
-                <el-option label="已结束" value="FINISHED" />
-                <el-option label="已取消" value="CANCELLED" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="封面图片">
-              <el-input v-model="formData.coverImage" placeholder="请输入封面图片URL（可选）">
-                <template #append>
-                  <el-button @click="previewCoverImage">预览</el-button>
-                </template>
-              </el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        
-        <el-form-item label="赛事描述">
-          <el-input
-            v-model="formData.description"
-            type="textarea"
-            :rows="4"
-            placeholder="请输入赛事描述信息（可选）"
-          />
-        </el-form-item>
-      </el-form>
+        <div class="form-section" v-if="isView && currentMatch">
+          <div class="section-header">
+            <div class="section-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+              <el-icon :size="18"><Clock /></el-icon>
+            </div>
+            <span class="section-title">系统信息</span>
+          </div>
+          <div class="section-body">
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">创建时间</span>
+                <span class="info-value">{{ formatDate(currentMatch.createTime) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">更新时间</span>
+                <span class="info-value">{{ formatDate(currentMatch.updateTime) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit" v-if="!isView">
-          确定
-        </el-button>
+        <div class="dialog-footer">
+          <el-button @click="dialogVisible = false" class="footer-btn">取消</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="handleSubmit" v-if="!isView" class="footer-btn primary-btn">
+            确定
+          </el-button>
+        </div>
       </template>
     </el-dialog>
     
     <el-dialog
       v-model="detailVisible"
       title="赛事详情"
-      width="650px"
+      width="600px"
       destroy-on-close
+      class="detail-dialog"
     >
-      <el-descriptions :column="2" border v-if="currentMatch">
-        <el-descriptions-item label="赛事ID" :span="1">{{ currentMatch.id }}</el-descriptions-item>
-        <el-descriptions-item label="赛事名称" :span="1">{{ currentMatch.matchName }}</el-descriptions-item>
+      <el-descriptions :column="2" border v-if="currentMatch" class="detail-descriptions">
+        <el-descriptions-item label="赛事名称" :span="2">
+          <span class="detail-value">{{ currentMatch.matchName }}</span>
+        </el-descriptions-item>
         <el-descriptions-item label="赛事类型" :span="1">
           <el-tag size="small" :type="getMatchTypeTagType(currentMatch.matchType)">
             {{ currentMatch.matchType }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="赛事状态" :span="1">
-          <el-tag :type="getStatusType(currentMatch.status)" size="small">
-            {{ getStatusText(currentMatch.status) }}
-          </el-tag>
+        <el-descriptions-item label="创建时间" :span="1">
+          <span class="detail-time">{{ formatDate(currentMatch.createTime) }}</span>
         </el-descriptions-item>
         <el-descriptions-item label="封面图片" :span="2" v-if="currentMatch.coverImage">
-          <el-image :src="currentMatch.coverImage" style="width: 300px; height: 180px;" fit="cover" />
+          <div class="cover-preview">
+            <el-image :src="currentMatch.coverImage" style="width: 100%; height: 200px;" fit="cover" />
+          </div>
         </el-descriptions-item>
         <el-descriptions-item label="赛事描述" :span="2" v-if="currentMatch.description">
-          {{ currentMatch.description }}
+          <span class="detail-desc">{{ currentMatch.description }}</span>
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间" :span="1">{{ formatDate(currentMatch.createTime) }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间" :span="1">{{ formatDate(currentMatch.updateTime) }}</el-descriptions-item>
+        <el-descriptions-item label="更新时间" :span="2">
+          <span class="detail-time">{{ formatDate(currentMatch.updateTime) }}</span>
+        </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
     
@@ -310,7 +313,9 @@ import {
   View,
   Edit,
   Trophy,
-  Calendar
+  Calendar,
+  InfoFilled,
+  Clock
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -331,8 +336,7 @@ const formRef = ref(null)
 
 const searchForm = reactive({
   matchName: '',
-  matchType: '',
-  status: ''
+  matchType: ''
 })
 
 const pagination = reactive({
@@ -344,7 +348,6 @@ const formData = reactive({
   id: null,
   matchName: '',
   matchType: '',
-  status: 'SCHEDULED',
   description: '',
   coverImage: ''
 })
@@ -355,9 +358,6 @@ const formRules = {
   ],
   matchType: [
     { required: true, message: '请选择赛事类型', trigger: 'change' }
-  ],
-  status: [
-    { required: true, message: '请选择赛事状态', trigger: 'change' }
   ]
 }
 
@@ -365,26 +365,6 @@ const dialogTitle = computed(() => {
   if (isView.value) return '查看赛事'
   return formData.id ? '编辑赛事' : '新增赛事'
 })
-
-const getStatusType = (status) => {
-  const map = {
-    'SCHEDULED': 'info',
-    'LIVE': 'warning',
-    'FINISHED': 'success',
-    'CANCELLED': 'danger'
-  }
-  return map[status] || 'info'
-}
-
-const getStatusText = (status) => {
-  const map = {
-    'SCHEDULED': '未开始',
-    'LIVE': '进行中',
-    'FINISHED': '已结束',
-    'CANCELLED': '已取消'
-  }
-  return map[status] || status
-}
 
 const getMatchTypeTagType = (type) => {
   const map = {
@@ -407,6 +387,10 @@ const formatDate = (date) => {
   const minutes = String(d.getMinutes()).padStart(2, '0')
   const seconds = String(d.getSeconds()).padStart(2, '0')
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+const getIndex = (index) => {
+  return (pagination.pageNum - 1) * pagination.pageSize + index + 1
 }
 
 const loadTableData = async () => {
@@ -436,7 +420,6 @@ const handleSearch = () => {
 const handleReset = () => {
   searchForm.matchName = ''
   searchForm.matchType = ''
-  searchForm.status = ''
   handleSearch()
 }
 
@@ -458,7 +441,6 @@ const resetForm = () => {
   formData.id = null
   formData.matchName = ''
   formData.matchType = ''
-  formData.status = 'SCHEDULED'
   formData.description = ''
   formData.coverImage = ''
 }
@@ -466,6 +448,7 @@ const resetForm = () => {
 const handleAdd = () => {
   resetForm()
   isView.value = false
+  currentMatch.value = null
   dialogVisible.value = true
 }
 
@@ -473,6 +456,7 @@ const handleEdit = (row) => {
   resetForm()
   isView.value = false
   Object.assign(formData, row)
+  currentMatch.value = { ...row }
   dialogVisible.value = true
 }
 
@@ -573,34 +557,72 @@ onMounted(() => {
 <style scoped>
 .match-list-container {
   width: 100%;
+  padding: 0;
 }
 
 .search-card {
   border-radius: 12px;
   margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
 }
 
 .search-card :deep(.el-card__body) {
   padding: 20px 24px;
 }
 
-.search-btn-group {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 12px;
+.search-form {
+  margin: 0;
 }
 
-.search-btn-group .el-button {
-  margin-left: 12px;
+.search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.search-item {
+  margin-bottom: 0;
+  flex: 0 0 auto;
+}
+
+.search-item :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #475569;
+}
+
+.search-input,
+.search-select {
+  width: 220px;
+}
+
+.search-buttons {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.search-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .table-card {
   border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .table-card :deep(.el-card__header) {
-  padding: 16px 20px;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(to right, #f8fafc, #ffffff);
 }
 
 .table-card :deep(.el-card__body) {
@@ -622,11 +644,26 @@ onMounted(() => {
 .table-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: #1e293b;
+  position: relative;
+}
+
+.table-title::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 18px;
+  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 2px;
 }
 
 .table-count {
   margin-left: 8px;
+  border-color: #e2e8f0;
+  color: #64748b;
 }
 
 .header-right {
@@ -634,14 +671,20 @@ onMounted(() => {
   gap: 12px;
 }
 
+.index-text {
+  font-weight: 500;
+  color: #64748b;
+}
+
 .match-name-cell {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .match-avatar {
   flex-shrink: 0;
+  border-radius: 8px;
 }
 
 .match-avatar-default {
@@ -650,18 +693,211 @@ onMounted(() => {
 
 .match-name-text {
   font-weight: 500;
-  color: #303133;
+  color: #1e293b;
+  font-size: 14px;
 }
 
 .desc-text {
-  color: #606266;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.time-text {
+  color: #64748b;
   font-size: 13px;
 }
 
 .pagination {
   display: flex;
   justify-content: flex-end;
+  padding: 20px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafafa;
+}
+
+.match-dialog :deep(.el-dialog) {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.match-dialog :deep(.el-dialog__header) {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(to right, #f8fafc, #ffffff);
+}
+
+.match-dialog :deep(.el-dialog__title) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.match-dialog :deep(.el-dialog__body) {
+  padding: 24px;
+  background: #fafafa;
+}
+
+.dialog-content {
+  min-height: 200px;
+}
+
+.form-section {
+  background: #ffffff;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(to right, #f8fafc, #ffffff);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.section-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.section-body {
   padding: 20px;
-  border-top: 1px solid #f3f4f6;
+}
+
+.match-form {
+  margin: 0;
+}
+
+.form-item-full {
+  width: 100%;
+}
+
+.match-form :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #475569;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+}
+
+.form-textarea :deep(.el-textarea__inner) {
+  resize: none;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.info-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.match-dialog :deep(.el-dialog__footer) {
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.footer-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.detail-dialog :deep(.el-dialog) {
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.detail-descriptions :deep(.el-descriptions__label) {
+  font-weight: 500;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.detail-descriptions :deep(.el-descriptions__content) {
+  color: #1e293b;
+}
+
+.detail-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.detail-time {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.detail-desc {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.cover-preview {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 </style>

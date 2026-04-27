@@ -13,8 +13,6 @@ public class MatchVO {
 
     private String matchType;
 
-    private String status;
-
     private String description;
 
     private String coverImage;
