@@ -1,16 +1,16 @@
 <template>
   <div class="season-list-container">
-    <el-card class="search-card" shadow="never">
-      <el-form :model="searchForm" label-width="100px">
-        <el-row :gutter="24">
-          <el-col :xs="24" :sm="12" :md="8">
-            <el-form-item label="所属赛事">
+    <el-card class="search-card" shadow="hover">
+      <el-form :model="searchForm" label-width="80px" class="search-form">
+        <div class="search-row">
+          <div class="search-item">
+            <el-form-item label="所属赛事" class="form-item">
               <el-select
                 v-model="searchForm.matchId"
                 placeholder="请选择赛事"
                 clearable
                 filterable
-                style="width: 100%"
+                class="search-select"
                 @change="handleSearch"
               >
                 <el-option
@@ -21,24 +21,25 @@
                 />
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12" :md="8">
-            <el-form-item label="赛季名称">
+          </div>
+          <div class="search-item">
+            <el-form-item label="赛季名称" class="form-item">
               <el-input
                 v-model="searchForm.seasonName"
                 placeholder="请输入赛季名称"
                 clearable
+                class="search-input"
                 @keyup.enter="handleSearch"
               />
             </el-form-item>
-          </el-col>
-          <el-col :xs="24" :sm="12" :md="8">
-            <el-form-item label="赛季状态">
+          </div>
+          <div class="search-item">
+            <el-form-item label="赛季状态" class="form-item">
               <el-select
                 v-model="searchForm.status"
                 placeholder="请选择状态"
                 clearable
-                style="width: 100%"
+                class="search-select"
                 @change="handleSearch"
               >
                 <el-option label="未开始" value="SCHEDULED" />
@@ -46,24 +47,24 @@
                 <el-option label="已结束" value="FINISHED" />
               </el-select>
             </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24" class="search-btn-group">
-            <el-button type="primary" @click="handleSearch">
+          </div>
+          <div class="search-item">
+            <el-button type="primary" @click="handleSearch" class="search-btn">
               <el-icon><Search /></el-icon>
               搜索
             </el-button>
-            <el-button @click="handleReset">
+          </div>
+          <div class="search-item">
+            <el-button @click="handleReset" class="search-btn">
               <el-icon><Refresh /></el-icon>
               重置
             </el-button>
-          </el-col>
-        </el-row>
+          </div>
+        </div>
       </el-form>
     </el-card>
     
-    <el-card class="table-card" shadow="never">
+    <el-card class="table-card" shadow="hover">
       <template #header>
         <div class="table-header">
           <div class="header-left">
@@ -93,11 +94,16 @@
         style="width: 100%"
         @selection-change="handleSelectionChange"
         stripe
-        :header-cell-style="{ backgroundColor: '#fafafa', color: '#606266', fontWeight: 600 }"
+        :header-cell-style="{ backgroundColor: '#f8fafc', color: '#475569', fontWeight: 600, fontSize: '14px', padding: '8px 0', height: '40px' }"
+        :cell-style="{ padding: '6px 0', height: '36px' }"
       >
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="matchName" label="所属赛事" min-width="200" show-overflow-tooltip>
+        <el-table-column type="selection" width="50" align="center" />
+        <el-table-column label="序号" width="70" align="center">
+          <template #default="{ $index }">
+            <span class="index-text">{{ getIndex($index) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="matchName" label="所属赛事" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="match-name-cell">
               <el-tag size="small" type="primary" effect="light">
@@ -106,7 +112,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="seasonName" label="赛季名称" min-width="220" show-overflow-tooltip>
+        <el-table-column prop="seasonName" label="赛季名称" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="season-name-cell">
               <el-avatar :size="32" class="season-avatar">
@@ -121,12 +127,12 @@
         </el-table-column>
         <el-table-column prop="startDate" label="开始日期" width="120" align="center">
           <template #default="{ row }">
-            {{ formatDate(row.startDate) }}
+            <span class="date-text">{{ formatDate(row.startDate) }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="endDate" label="结束日期" width="120" align="center">
           <template #default="{ row }">
-            {{ formatDate(row.endDate) }}
+            <span class="date-text">{{ formatDate(row.endDate) }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
@@ -136,29 +142,20 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="currentRound" label="轮次" width="120" align="center">
-          <template #default="{ row }">
-            <div class="round-info">
-              <span class="current-round">{{ row.currentRound || 0 }}</span>
-              <span class="round-divider">/</span>
-              <span class="total-rounds">{{ row.totalRounds || '-' }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="220" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-tooltip content="查看" placement="top">
-              <el-button type="primary" link @click="handleView(row)">
+              <el-button type="primary" link size="small" @click="handleView(row)">
                 <el-icon><View /></el-icon>
               </el-button>
             </el-tooltip>
             <el-tooltip content="编辑" placement="top">
-              <el-button type="primary" link @click="handleEdit(row)">
+              <el-button type="primary" link size="small" @click="handleEdit(row)">
                 <el-icon><Edit /></el-icon>
               </el-button>
             </el-tooltip>
             <el-tooltip content="删除" placement="top">
-              <el-button type="danger" link @click="handleDelete(row)">
+              <el-button type="danger" link size="small" @click="handleDelete(row)">
                 <el-icon><Delete /></el-icon>
               </el-button>
             </el-tooltip>
@@ -184,126 +181,138 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="650px"
+      width="680px"
       :close-on-click-modal="false"
       destroy-on-close
+      class="season-dialog"
     >
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="formRules"
-        label-width="100px"
-        v-loading="formLoading"
-      >
-        <el-row :gutter="24">
-          <el-col :span="12">
-            <el-form-item label="所属赛事" prop="matchId">
-              <el-select
-                v-model="formData.matchId"
-                placeholder="请选择所属赛事"
-                filterable
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="item in matchOptions"
-                  :key="item.id"
-                  :label="item.matchName"
-                  :value="item.id"
+      <div class="dialog-content" v-loading="formLoading">
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <el-icon :size="18"><InfoFilled /></el-icon>
+            </div>
+            <span class="section-title">基本信息</span>
+          </div>
+          <div class="section-body">
+            <el-form
+              ref="formRef"
+              :model="formData"
+              :rules="formRules"
+              label-width="100px"
+              class="season-form"
+            >
+              <el-row :gutter="24">
+                <el-col :span="12">
+                  <el-form-item label="所属赛事" prop="matchId">
+                    <el-select
+                      v-model="formData.matchId"
+                      placeholder="请选择所属赛事"
+                      filterable
+                      class="form-select"
+                    >
+                      <el-option
+                        v-for="item in matchOptions"
+                        :key="item.id"
+                        :label="item.matchName"
+                        :value="item.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="赛季名称" prop="seasonName">
+                    <el-input v-model="formData.seasonName" placeholder="请输入赛季名称" class="form-input" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              
+              <el-row :gutter="24">
+                <el-col :span="12">
+                  <el-form-item label="赛季年份">
+                    <el-input v-model="formData.seasonYear" placeholder="请输入赛季年份（如：2024）" class="form-input" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="赛季状态" prop="status">
+                    <el-select v-model="formData.status" placeholder="请选择赛季状态" class="form-select">
+                      <el-option label="未开始" value="SCHEDULED" />
+                      <el-option label="进行中" value="LIVE" />
+                      <el-option label="已结束" value="FINISHED" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              
+              <el-row :gutter="24">
+                <el-col :span="12">
+                  <el-form-item label="开始日期" prop="startDate">
+                    <el-date-picker
+                      v-model="formData.startDate"
+                      type="date"
+                      placeholder="请选择开始日期"
+                      class="form-select"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                    />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="结束日期">
+                    <el-date-picker
+                      v-model="formData.endDate"
+                      type="date"
+                      placeholder="请选择结束日期"
+                      class="form-select"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                    />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              
+              <el-form-item label="赛季描述">
+                <el-input
+                  v-model="formData.description"
+                  type="textarea"
+                  :rows="4"
+                  placeholder="请输入赛季描述信息（可选）"
+                  class="form-textarea"
                 />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="赛季名称" prop="seasonName">
-              <el-input v-model="formData.seasonName" placeholder="请输入赛季名称" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+              </el-form-item>
+            </el-form>
+          </div>
+        </div>
         
-        <el-row :gutter="24">
-          <el-col :span="12">
-            <el-form-item label="赛季年份">
-              <el-input v-model="formData.seasonYear" placeholder="请输入赛季年份（如：2024）" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="赛季状态" prop="status">
-              <el-select v-model="formData.status" placeholder="请选择赛季状态" style="width: 100%">
-                <el-option label="未开始" value="SCHEDULED" />
-                <el-option label="进行中" value="LIVE" />
-                <el-option label="已结束" value="FINISHED" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        
-        <el-row :gutter="24">
-          <el-col :span="12">
-            <el-form-item label="开始日期" prop="startDate">
-              <el-date-picker
-                v-model="formData.startDate"
-                type="date"
-                placeholder="请选择开始日期"
-                style="width: 100%"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="结束日期">
-              <el-date-picker
-                v-model="formData.endDate"
-                type="date"
-                placeholder="请选择结束日期"
-                style="width: 100%"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        
-        <el-row :gutter="24">
-          <el-col :span="12">
-            <el-form-item label="总轮次">
-              <el-input-number
-                v-model="formData.totalRounds"
-                :min="0"
-                :max="999"
-                placeholder="请输入总轮次"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="当前轮次">
-              <el-input-number
-                v-model="formData.currentRound"
-                :min="0"
-                :max="999"
-                placeholder="请输入当前轮次"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        
-        <el-form-item label="赛季描述">
-          <el-input
-            v-model="formData.description"
-            type="textarea"
-            :rows="4"
-            placeholder="请输入赛季描述信息（可选）"
-          />
-        </el-form-item>
-      </el-form>
+        <div class="form-section" v-if="isView && currentSeason">
+          <div class="section-header">
+            <div class="section-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+              <el-icon :size="18"><Clock /></el-icon>
+            </div>
+            <span class="section-title">系统信息</span>
+          </div>
+          <div class="section-body">
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">创建时间</span>
+                <span class="info-value">{{ formatDateTime(currentSeason.createTime) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">更新时间</span>
+                <span class="info-value">{{ formatDateTime(currentSeason.updateTime) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit" v-if="!isView">
-          确定
-        </el-button>
+        <div class="dialog-footer">
+          <el-button @click="dialogVisible = false" class="footer-btn">取消</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="handleSubmit" v-if="!isView" class="footer-btn primary-btn">
+            确定
+          </el-button>
+        </div>
       </template>
     </el-dialog>
     
@@ -312,31 +321,43 @@
       title="赛季详情"
       width="600px"
       destroy-on-close
+      class="detail-dialog"
     >
-      <el-descriptions :column="2" border v-if="currentSeason">
-        <el-descriptions-item label="赛季ID" :span="1">{{ currentSeason.id }}</el-descriptions-item>
+      <el-descriptions :column="2" border v-if="currentSeason" class="detail-descriptions">
+        <el-descriptions-item label="赛季ID" :span="1">
+          <span class="detail-value">{{ currentSeason.id }}</span>
+        </el-descriptions-item>
         <el-descriptions-item label="所属赛事" :span="1">
           <el-tag size="small" type="primary">
             {{ currentSeason.matchName }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="赛季名称" :span="1">{{ currentSeason.seasonName }}</el-descriptions-item>
-        <el-descriptions-item label="赛季年份" :span="1">{{ currentSeason.seasonYear || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="赛季名称" :span="1">
+          <span class="detail-value">{{ currentSeason.seasonName }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="赛季年份" :span="1">
+          <span class="detail-text">{{ currentSeason.seasonYear || '-' }}</span>
+        </el-descriptions-item>
         <el-descriptions-item label="赛季状态" :span="1">
           <el-tag :type="getStatusType(currentSeason.status)" size="small">
             {{ getStatusText(currentSeason.status) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="轮次进度" :span="1">
-          <span class="detail-round">{{ currentSeason.currentRound || 0 }} / {{ currentSeason.totalRounds || '-' }}</span>
+        <el-descriptions-item label="开始日期" :span="1">
+          <span class="detail-text">{{ formatDate(currentSeason.startDate) }}</span>
         </el-descriptions-item>
-        <el-descriptions-item label="开始日期" :span="1">{{ formatDate(currentSeason.startDate) }}</el-descriptions-item>
-        <el-descriptions-item label="结束日期" :span="1">{{ formatDate(currentSeason.endDate) }}</el-descriptions-item>
+        <el-descriptions-item label="结束日期" :span="1">
+          <span class="detail-text">{{ formatDate(currentSeason.endDate) || '-' }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间" :span="1">
+          <span class="detail-time">{{ formatDateTime(currentSeason.createTime) }}</span>
+        </el-descriptions-item>
         <el-descriptions-item label="赛季描述" :span="2" v-if="currentSeason.description">
-          {{ currentSeason.description }}
+          <span class="detail-desc">{{ currentSeason.description }}</span>
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间" :span="1">{{ formatDateTime(currentSeason.createTime) }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间" :span="1">{{ formatDateTime(currentSeason.updateTime) }}</el-descriptions-item>
+        <el-descriptions-item label="更新时间" :span="2">
+          <span class="detail-time">{{ formatDateTime(currentSeason.updateTime) }}</span>
+        </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
@@ -362,7 +383,9 @@ import {
   Delete,
   View,
   Edit,
-  Calendar
+  Calendar,
+  InfoFilled,
+  Clock
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -408,9 +431,7 @@ const formData = reactive({
   status: 'SCHEDULED',
   startDate: null,
   endDate: null,
-  description: '',
-  totalRounds: null,
-  currentRound: 0
+  description: ''
 })
 
 const formRules = {
@@ -470,6 +491,10 @@ const formatDateTime = (date) => {
   const minutes = String(d.getMinutes()).padStart(2, '0')
   const seconds = String(d.getSeconds()).padStart(2, '0')
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+const getIndex = (index) => {
+  return (pagination.pageNum - 1) * pagination.pageSize + index + 1
 }
 
 const loadMatchOptions = async () => {
@@ -537,13 +562,12 @@ const resetForm = () => {
   formData.startDate = null
   formData.endDate = null
   formData.description = ''
-  formData.totalRounds = null
-  formData.currentRound = 0
 }
 
 const handleAdd = () => {
   resetForm()
   isView.value = false
+  currentSeason.value = null
   dialogVisible.value = true
 }
 
@@ -551,6 +575,7 @@ const handleEdit = (row) => {
   resetForm()
   isView.value = false
   Object.assign(formData, row)
+  currentSeason.value = { ...row }
   dialogVisible.value = true
 }
 
@@ -558,7 +583,9 @@ const handleView = async (row) => {
   try {
     const res = await getSeasonById(row.id)
     currentSeason.value = res.data
-    detailVisible.value = true
+    isView.value = true
+    Object.assign(formData, res.data)
+    dialogVisible.value = true
   } catch (error) {
     ElMessage.error('获取详情失败')
     console.error(error)
@@ -641,34 +668,73 @@ onMounted(() => {
 <style scoped>
 .season-list-container {
   width: 100%;
+  padding: 0;
 }
 
 .search-card {
   border-radius: 12px;
   margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
 }
 
 .search-card :deep(.el-card__body) {
   padding: 20px 24px;
 }
 
-.search-btn-group {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 12px;
+.search-form {
+  margin: 0;
 }
 
-.search-btn-group .el-button {
-  margin-left: 12px;
+.search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.search-item {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 0;
+  flex: 0 0 auto;
+}
+
+.form-item {
+  margin-bottom: 0;
+}
+
+.form-item :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #475569;
+}
+
+.search-input,
+.search-select {
+  width: 200px;
+}
+
+.search-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin-bottom: 2px;
+}
+
+.search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .table-card {
   border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .table-card :deep(.el-card__header) {
-  padding: 16px 20px;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(to right, #f8fafc, #ffffff);
 }
 
 .table-card :deep(.el-card__body) {
@@ -691,15 +757,41 @@ onMounted(() => {
 .table-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: #1e293b;
+  position: relative;
+}
+
+.table-title::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 18px;
+  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 2px;
 }
 
 .table-count {
   margin-left: 8px;
+  border-color: #e2e8f0;
+  color: #64748b;
 }
 
 .header-right {
   display: flex;
+  gap: 12px;
+}
+
+.index-text {
+  font-weight: 500;
+  color: #64748b;
+}
+
+.match-name-cell {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
@@ -712,6 +804,7 @@ onMounted(() => {
 .season-avatar {
   flex-shrink: 0;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border-radius: 8px;
 }
 
 .season-info {
@@ -722,7 +815,8 @@ onMounted(() => {
 
 .season-name {
   font-weight: 500;
-  color: #303133;
+  color: #1e293b;
+  font-size: 14px;
 }
 
 .season-year {
@@ -730,38 +824,195 @@ onMounted(() => {
   color: #909399;
 }
 
-.round-info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.current-round {
-  font-size: 14px;
-  font-weight: 600;
-  color: #409eff;
-}
-
-.round-divider {
-  color: #909399;
-}
-
-.total-rounds {
-  font-size: 14px;
-  color: #606266;
-}
-
-.detail-round {
-  font-size: 16px;
-  font-weight: 600;
-  color: #409eff;
+.date-text {
+  color: #64748b;
+  font-size: 13px;
 }
 
 .pagination {
   display: flex;
   justify-content: flex-end;
+  padding: 20px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafafa;
+}
+
+.season-dialog :deep(.el-dialog) {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.season-dialog :deep(.el-dialog__header) {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(to right, #f8fafc, #ffffff);
+}
+
+.season-dialog :deep(.el-dialog__title) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.season-dialog :deep(.el-dialog__body) {
+  padding: 24px;
+  background: #fafafa;
+}
+
+.dialog-content {
+  min-height: 200px;
+}
+
+.form-section {
+  background: #ffffff;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(to right, #f8fafc, #ffffff);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.section-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.section-body {
   padding: 20px;
-  border-top: 1px solid #f3f4f6;
+}
+
+.season-form {
+  margin: 0;
+}
+
+.season-form :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #475569;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+}
+
+.form-textarea :deep(.el-textarea__inner) {
+  resize: none;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.info-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.season-dialog :deep(.el-dialog__footer) {
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.footer-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.detail-dialog :deep(.el-dialog) {
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.detail-descriptions :deep(.el-descriptions__label) {
+  font-weight: 500;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.detail-descriptions :deep(.el-descriptions__content) {
+  color: #1e293b;
+}
+
+.detail-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.detail-text {
+  font-size: 14px;
+  color: #475569;
+}
+
+.detail-time {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.detail-desc {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
 }
 </style>

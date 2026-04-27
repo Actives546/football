@@ -12,16 +12,13 @@
         <result column="start_date" property="startDate" jdbcType="DATE"/>
         <result column="end_date" property="endDate" jdbcType="DATE"/>
         <result column="description" property="description" jdbcType="VARCHAR"/>
-        <result column="total_rounds" property="totalRounds" jdbcType="INTEGER"/>
-        <result column="current_round" property="currentRound" jdbcType="INTEGER"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         s.id, s.match_id, m.match_name, s.season_name, s.season_year, s.status,
-        s.start_date, s.end_date, s.description, s.total_rounds, s.current_round,
-        s.create_time, s.update_time
+        s.start_date, s.end_date, s.description, s.create_time, s.update_time
     </sql>
 
     <select id="selectById" resultMap="BaseResultMap">
@@ -77,10 +74,10 @@
     <insert id="insert" parameterType="com.football.entity.Season" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `season` (
             match_id, season_name, season_year, status, start_date, end_date,
-            description, total_rounds, current_round, create_time, update_time, deleted
+            description, create_time, update_time, deleted
         ) VALUES (
             #{matchId}, #{seasonName}, #{seasonYear}, #{status}, #{startDate}, #{endDate},
-            #{description}, #{totalRounds}, #{currentRound}, NOW(), NOW(), 0
+            #{description}, NOW(), NOW(), 0
         )
     </insert>
 
@@ -94,8 +91,6 @@
             start_date = #{startDate},
             end_date = #{endDate},
             description = #{description},
-            total_rounds = #{totalRounds},
-            current_round = #{currentRound},
             update_time = NOW()
         WHERE id = #{id} AND deleted = 0
     </update>

@@ -24,8 +24,4 @@ public class Season extends BaseEntity {
     private LocalDate endDate;
 
     private String description;
-
-    private Integer totalRounds;
-
-    private Integer currentRound;
 }
