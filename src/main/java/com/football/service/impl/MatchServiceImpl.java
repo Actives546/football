@@ -28,11 +28,6 @@ public class MatchServiceImpl implements MatchService {
     @Autowired
     private MatchMapper matchMapper;
 
-    private static final String STATUS_SCHEDULED = "SCHEDULED";
-    private static final String STATUS_LIVE = "LIVE";
-    private static final String STATUS_FINISHED = "FINISHED";
-    private static final String STATUS_CANCELLED = "CANCELLED";
-
     @Override
     public Result<MatchVO> getById(Long id) {
         if (id == null) {
@@ -77,10 +72,6 @@ public class MatchServiceImpl implements MatchService {
         validateMatchDTO(matchDTO);
 
         Match match = convertToEntity(matchDTO);
-
-        if (!StringUtils.hasText(match.getStatus())) {
-            match.setStatus(STATUS_SCHEDULED);
-        }
 
         int rows = matchMapper.insert(match);
         log.info("新增赛事成功，赛事ID：{}，赛事名称：{}", match.getId(), match.getMatchName());
@@ -147,9 +138,6 @@ public class MatchServiceImpl implements MatchService {
         }
         if (!StringUtils.hasText(matchDTO.getMatchType())) {
             throw new BusinessException("赛事类型不能为空");
-        }
-        if (!StringUtils.hasText(matchDTO.getStatus())) {
-            throw new BusinessException("赛事状态不能为空");
         }
     }
 

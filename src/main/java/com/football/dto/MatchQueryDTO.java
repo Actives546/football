@@ -9,8 +9,6 @@ public class MatchQueryDTO {
 
     private String matchType;
 
-    private String status;
-
     private Integer pageNum = 1;
 
     private Integer pageSize = 10;
