@@ -44,6 +44,21 @@
             <template #title>赛季管理</template>
           </el-menu-item>
         </el-sub-menu>
+        
+        <el-sub-menu index="personnel">
+          <template #title>
+            <el-icon><User /></el-icon>
+            <span>人员信息管理</span>
+          </template>
+          <el-menu-item index="/personnel/list">
+            <el-icon><UserFilled /></el-icon>
+            <template #title>人员管理</template>
+          </el-menu-item>
+          <el-menu-item index="/player/list" disabled>
+            <el-icon><User /></el-icon>
+            <template #title>球员管理</template>
+          </el-menu-item>
+        </el-sub-menu>
       </el-menu>
     </el-aside>
     

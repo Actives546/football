@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.football.mapper.PersonMapper">
+
+    <resultMap id="BaseResultMap" type="com.football.vo.PersonVO">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="org_id" property="orgId" jdbcType="BIGINT"/>
+        <result column="org_name" property="orgName" jdbcType="VARCHAR"/>
+        <result column="person_type" property="personType" jdbcType="VARCHAR"/>
+        <result column="person_name" property="personName" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="gender" property="gender" jdbcType="INTEGER"/>
+        <result column="birthday" property="birthday" jdbcType="DATE"/>
+        <result column="id_card" property="idCard" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="avatar" property="avatar" jdbcType="VARCHAR"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        p.id, p.org_id, o.org_name, p.person_type, p.person_name, 
+        p.phone, p.email, p.gender, p.birthday, p.id_card, 
+        p.address, p.avatar, p.remark, p.status, 
+        p.create_time, p.update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `person` p
+        LEFT JOIN `organization` o ON p.org_id = o.id AND o.deleted = 0
+        WHERE p.id = #{id} AND p.deleted = 0
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `person` p
+        LEFT JOIN `organization` o ON p.org_id = o.id AND o.deleted = 0
+        WHERE p.deleted = 0
+        <if test="query.orgId != null">
+            AND p.org_id = #{query.orgId}
+        </if>
+        <if test="query.personType != null and query.personType != ''">
+            AND p.person_type = #{query.personType}
+        </if>
+        <if test="query.personName != null and query.personName != ''">
+            AND p.person_name LIKE CONCAT('%', #{query.personName}, '%')
+        </if>
+        <if test="query.phone != null and query.phone != ''">
+            AND p.phone LIKE CONCAT('%', #{query.phone}, '%')
+        </if>
+        <if test="query.status != null">
+            AND p.status = #{query.status}
+        </if>
+        ORDER BY p.create_time DESC
+        <if test="query.pageNum != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{query.offset}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM `person` p
+        WHERE p.deleted = 0
+        <if test="query.orgId != null">
+            AND p.org_id = #{query.orgId}
+        </if>
+        <if test="query.personType != null and query.personType != ''">
+            AND p.person_type = #{query.personType}
+        </if>
+        <if test="query.personName != null and query.personName != ''">
+            AND p.person_name LIKE CONCAT('%', #{query.personName}, '%')
+        </if>
+        <if test="query.phone != null and query.phone != ''">
+            AND p.phone LIKE CONCAT('%', #{query.phone}, '%')
+        </if>
+        <if test="query.status != null">
+            AND p.status = #{query.status}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.football.entity.Person" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `person` (
+            org_id, person_type, person_name, phone, email, 
+            gender, birthday, id_card, address, avatar, 
+            remark, status, create_time, update_time, deleted
+        ) VALUES (
+            #{orgId}, #{personType}, #{personName}, #{phone}, #{email}, 
+            #{gender}, #{birthday}, #{idCard}, #{address}, #{avatar}, 
+            #{remark}, #{status}, NOW(), NOW(), 0
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.football.entity.Person">
+        UPDATE `person`
+        SET
+            org_id = #{orgId},
+            person_type = #{personType},
+            person_name = #{personName},
+            phone = #{phone},
+            email = #{email},
+            gender = #{gender},
+            birthday = #{birthday},
+            id_card = #{idCard},
+            address = #{address},
+            avatar = #{avatar},
+            remark = #{remark},
+            status = #{status},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE `person`
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE `person`
+        SET deleted = 1, update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+    <select id="selectByOrgId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `person` p
+        LEFT JOIN `organization` o ON p.org_id = o.id AND o.deleted = 0
+        WHERE p.org_id = #{orgId} AND p.deleted = 0
+        ORDER BY p.create_time DESC
+    </select>
+
+    <select id="selectByOrgIdCount" resultType="int">
+        SELECT COUNT(*)
+        FROM `person`
+        WHERE org_id = #{orgId} AND deleted = 0
+    </select>
+
+</mapper>
