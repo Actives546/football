@@ -3,8 +3,6 @@ package com.football.dto;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 
 @Data
 public class MatchDTO {
@@ -19,11 +17,6 @@ public class MatchDTO {
 
     @NotBlank(message = "赛事状态不能为空")
     private String status;
-
-    @NotNull(message = "比赛开始时间不能为空")
-    private LocalDateTime startTime;
-
-    private LocalDateTime endTime;
 
     private String description;
 

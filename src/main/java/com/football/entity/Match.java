@@ -3,8 +3,6 @@ package com.football.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Match extends BaseEntity {
@@ -16,10 +14,6 @@ public class Match extends BaseEntity {
     private String matchType;
 
     private String status;
-
-    private LocalDateTime startTime;
-
-    private LocalDateTime endTime;
 
     private String description;
 

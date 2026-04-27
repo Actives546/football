@@ -16,7 +16,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,9 +150,6 @@ public class MatchServiceImpl implements MatchService {
         }
         if (!StringUtils.hasText(matchDTO.getStatus())) {
             throw new BusinessException("赛事状态不能为空");
-        }
-        if (matchDTO.getStartTime() == null) {
-            throw new BusinessException("比赛开始时间不能为空");
         }
     }
 

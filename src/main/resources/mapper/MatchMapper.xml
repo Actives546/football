@@ -7,8 +7,6 @@
         <result column="match_name" property="matchName" jdbcType="VARCHAR"/>
         <result column="match_type" property="matchType" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="VARCHAR"/>
-        <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
-        <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
         <result column="description" property="description" jdbcType="VARCHAR"/>
         <result column="cover_image" property="coverImage" jdbcType="VARCHAR"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
@@ -17,7 +15,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, match_name, match_type, status, start_time, end_time, description,
+        id, match_name, match_type, status, description,
         cover_image, create_time, update_time, deleted
     </sql>
 
@@ -65,10 +63,10 @@
 
     <insert id="insert" parameterType="com.football.entity.Match" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `match` (
-            match_name, match_type, status, start_time, end_time, description,
+            match_name, match_type, status, description,
             cover_image, create_time, update_time, deleted
         ) VALUES (
-            #{matchName}, #{matchType}, #{status}, #{startTime}, #{endTime}, #{description},
+            #{matchName}, #{matchType}, #{status}, #{description},
             #{coverImage}, NOW(), NOW(), 0
         )
     </insert>
@@ -79,8 +77,6 @@
             match_name = #{matchName},
             match_type = #{matchType},
             status = #{status},
-            start_time = #{startTime},
-            end_time = #{endTime},
             description = #{description},
             cover_image = #{coverImage},
             update_time = NOW()

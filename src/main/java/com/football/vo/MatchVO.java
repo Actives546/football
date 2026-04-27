@@ -15,10 +15,6 @@ public class MatchVO {
 
     private String status;
 
-    private LocalDateTime startTime;
-
-    private LocalDateTime endTime;
-
     private String description;
 
     private String coverImage;

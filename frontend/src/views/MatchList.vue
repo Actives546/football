@@ -114,19 +114,16 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="startTime" label="开始时间" width="170" align="center">
-          <template #default="{ row }">
-            <div class="time-cell">
-              <el-icon class="time-icon"><Clock /></el-icon>
-              {{ formatDate(row.startTime) }}
-            </div>
-          </template>
-        </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small" effect="dark">
               {{ getStatusText(row.status) }}
             </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="desc-text">{{ row.description || '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="240" align="center" fixed="right">
@@ -173,7 +170,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="700px"
+      width="650px"
       :close-on-click-modal="false"
       destroy-on-close
     >
@@ -215,42 +212,16 @@
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
-        
-        <el-row :gutter="24">
           <el-col :span="12">
-            <el-form-item label="开始时间" prop="startTime">
-              <el-date-picker
-                v-model="formData.startTime"
-                type="datetime"
-                placeholder="请选择开始时间"
-                style="width: 100%"
-                format="YYYY-MM-DD HH:mm:ss"
-                value-format="YYYY-MM-DD HH:mm:ss"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="结束时间">
-              <el-date-picker
-                v-model="formData.endTime"
-                type="datetime"
-                placeholder="请选择结束时间"
-                style="width: 100%"
-                format="YYYY-MM-DD HH:mm:ss"
-                value-format="YYYY-MM-DD HH:mm:ss"
-              />
+            <el-form-item label="封面图片">
+              <el-input v-model="formData.coverImage" placeholder="请输入封面图片URL（可选）">
+                <template #append>
+                  <el-button @click="previewCoverImage">预览</el-button>
+                </template>
+              </el-input>
             </el-form-item>
           </el-col>
         </el-row>
-        
-        <el-form-item label="封面图片">
-          <el-input v-model="formData.coverImage" placeholder="请输入封面图片URL（可选）">
-            <template #append>
-              <el-button @click="previewCoverImage">预览</el-button>
-            </template>
-          </el-input>
-        </el-form-item>
         
         <el-form-item label="赛事描述">
           <el-input
@@ -289,8 +260,6 @@
             {{ getStatusText(currentMatch.status) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="开始时间" :span="1">{{ formatDate(currentMatch.startTime) }}</el-descriptions-item>
-        <el-descriptions-item label="结束时间" :span="1">{{ formatDate(currentMatch.endTime) }}</el-descriptions-item>
         <el-descriptions-item label="封面图片" :span="2" v-if="currentMatch.coverImage">
           <el-image :src="currentMatch.coverImage" style="width: 300px; height: 180px;" fit="cover" />
         </el-descriptions-item>
@@ -341,7 +310,6 @@ import {
   View,
   Edit,
   Trophy,
-  Clock,
   Calendar
 } from '@element-plus/icons-vue'
 
@@ -377,8 +345,6 @@ const formData = reactive({
   matchName: '',
   matchType: '',
   status: 'SCHEDULED',
-  startTime: null,
-  endTime: null,
   description: '',
   coverImage: ''
 })
@@ -392,9 +358,6 @@ const formRules = {
   ],
   status: [
     { required: true, message: '请选择赛事状态', trigger: 'change' }
-  ],
-  startTime: [
-    { required: true, message: '请选择开始时间', trigger: 'change' }
   ]
 }
 
@@ -496,8 +459,6 @@ const resetForm = () => {
   formData.matchName = ''
   formData.matchType = ''
   formData.status = 'SCHEDULED'
-  formData.startTime = null
-  formData.endTime = null
   formData.description = ''
   formData.coverImage = ''
 }
@@ -692,17 +653,9 @@ onMounted(() => {
   color: #303133;
 }
 
-.time-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+.desc-text {
   color: #606266;
   font-size: 13px;
-}
-
-.time-icon {
-  color: #909399;
 }
 
 .pagination {

@@ -2,8 +2,6 @@ package com.football.dto;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
 public class MatchQueryDTO {
 
@@ -12,10 +10,6 @@ public class MatchQueryDTO {
     private String matchType;
 
     private String status;
-
-    private LocalDateTime startTime;
-
-    private LocalDateTime endTime;
 
     private Integer pageNum = 1;
 
