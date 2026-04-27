@@ -426,8 +426,7 @@ const formRules = {
 }
 
 const parentOrgOptions = computed(() => {
-  const options = [{ id: 0, label: '顶级机构', children: treeData.value }]
-  return options
+  return treeData.value
 })
 
 const dialogTitle = computed(() => {
