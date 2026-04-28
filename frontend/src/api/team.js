@@ -76,3 +76,16 @@ export function disableTeamBatch(ids) {
     data: ids
   })
 }
+
+export function importTeam(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request({
+    url: '/team/import',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}

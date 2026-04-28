@@ -87,4 +87,13 @@ public interface TeamService {
      * @return 更新是否成功
      */
     Result<Boolean> updateStatusBatch(List<Long> ids, Integer status);
+
+    /**
+     * 导入球队数据
+     * 
+     * @param file 文件字节数组
+     * @param fileName 文件名
+     * @return 导入结果，包含成功数量、失败数量和失败详情
+     */
+    Result<Map<String, Object>> importTeams(byte[] file, String fileName);
 }
