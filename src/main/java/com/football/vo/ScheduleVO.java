@@ -17,11 +17,25 @@ public class ScheduleVO {
 
     private String matchName;
 
+    private Long stadiumId;
+
+    private String stadiumName;
+
+    private String stadiumAddress;
+
+    private Integer stadiumCapacity;
+
+    private String stadiumContactPhone;
+
+    private String stadiumPhotoUrl;
+
+    private Integer stadiumStatus;
+
+    private String stadiumRemark;
+
     private String scheduleName;
 
     private String status;
-
-    private String location;
 
     private LocalDateTime startTime;
 

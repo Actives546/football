@@ -8,9 +8,16 @@
         <result column="season_name" property="seasonName" jdbcType="VARCHAR"/>
         <result column="match_id" property="matchId" jdbcType="BIGINT"/>
         <result column="match_name" property="matchName" jdbcType="VARCHAR"/>
+        <result column="stadium_id" property="stadiumId" jdbcType="BIGINT"/>
+        <result column="stadium_name" property="stadiumName" jdbcType="VARCHAR"/>
+        <result column="stadium_address" property="stadiumAddress" jdbcType="VARCHAR"/>
+        <result column="stadium_capacity" property="stadiumCapacity" jdbcType="INTEGER"/>
+        <result column="stadium_contact_phone" property="stadiumContactPhone" jdbcType="VARCHAR"/>
+        <result column="stadium_photo_url" property="stadiumPhotoUrl" jdbcType="VARCHAR"/>
+        <result column="stadium_status" property="stadiumStatus" jdbcType="TINYINT"/>
+        <result column="stadium_remark" property="stadiumRemark" jdbcType="VARCHAR"/>
         <result column="schedule_name" property="scheduleName" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="VARCHAR"/>
-        <result column="location" property="location" jdbcType="VARCHAR"/>
         <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
@@ -18,7 +25,10 @@
 
     <sql id="Base_Column_List">
         s.id, s.season_id, se.season_name, se.match_id, m.match_name, 
-        s.schedule_name, s.status, s.location, s.start_time, 
+        s.stadium_id, st.stadium_name, st.address as stadium_address, st.capacity as stadium_capacity,
+        st.contact_phone as stadium_contact_phone, st.photo_url as stadium_photo_url,
+        st.status as stadium_status, st.remark as stadium_remark,
+        s.schedule_name, s.status, s.start_time, 
         s.create_time, s.update_time
     </sql>
 
@@ -28,6 +38,7 @@
         FROM `schedule` s
         LEFT JOIN `season` se ON s.season_id = se.id AND se.deleted = 0
         LEFT JOIN `match` m ON se.match_id = m.id AND m.deleted = 0
+        LEFT JOIN `stadium` st ON s.stadium_id = st.id AND st.deleted = 0
         WHERE s.id = #{id} AND s.deleted = 0
     </select>
 
@@ -37,18 +48,19 @@
         FROM `schedule` s
         LEFT JOIN `season` se ON s.season_id = se.id AND se.deleted = 0
         LEFT JOIN `match` m ON se.match_id = m.id AND m.deleted = 0
+        LEFT JOIN `stadium` st ON s.stadium_id = st.id AND st.deleted = 0
         WHERE s.deleted = 0
         <if test="query.seasonId != null">
             AND s.season_id = #{query.seasonId}
+        </if>
+        <if test="query.stadiumId != null">
+            AND s.stadium_id = #{query.stadiumId}
         </if>
         <if test="query.scheduleName != null and query.scheduleName != ''">
             AND s.schedule_name LIKE CONCAT('%', #{query.scheduleName}, '%')
         </if>
         <if test="query.status != null and query.status != ''">
             AND s.status = #{query.status}
-        </if>
-        <if test="query.location != null and query.location != ''">
-            AND s.location LIKE CONCAT('%', #{query.location}, '%')
         </if>
         ORDER BY s.start_time DESC, s.create_time DESC
         <if test="query.pageNum != null and query.pageSize != null">
@@ -63,23 +75,23 @@
         <if test="query.seasonId != null">
             AND s.season_id = #{query.seasonId}
         </if>
+        <if test="query.stadiumId != null">
+            AND s.stadium_id = #{query.stadiumId}
+        </if>
         <if test="query.scheduleName != null and query.scheduleName != ''">
             AND s.schedule_name LIKE CONCAT('%', #{query.scheduleName}, '%')
         </if>
         <if test="query.status != null and query.status != ''">
             AND s.status = #{query.status}
         </if>
-        <if test="query.location != null and query.location != ''">
-            AND s.location LIKE CONCAT('%', #{query.location}, '%')
-        </if>
     </select>
 
     <insert id="insert" parameterType="com.football.entity.Schedule" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `schedule` (
-            season_id, schedule_name, status, location, start_time,
+            season_id, stadium_id, schedule_name, status, start_time,
             create_time, update_time, deleted
         ) VALUES (
-            #{seasonId}, #{scheduleName}, #{status}, #{location}, #{startTime},
+            #{seasonId}, #{stadiumId}, #{scheduleName}, #{status}, #{startTime},
             NOW(), NOW(), 0
         )
     </insert>
@@ -88,9 +100,9 @@
         UPDATE `schedule`
         SET
             season_id = #{seasonId},
+            stadium_id = #{stadiumId},
             schedule_name = #{scheduleName},
             status = #{status},
-            location = #{location},
             start_time = #{startTime},
             update_time = NOW()
         WHERE id = #{id} AND deleted = 0
@@ -118,6 +130,7 @@
         FROM `schedule` s
         LEFT JOIN `season` se ON s.season_id = se.id AND se.deleted = 0
         LEFT JOIN `match` m ON se.match_id = m.id AND m.deleted = 0
+        LEFT JOIN `stadium` st ON s.stadium_id = st.id AND st.deleted = 0
         WHERE s.season_id = #{seasonId} AND s.deleted = 0
         ORDER BY s.start_time DESC
     </select>

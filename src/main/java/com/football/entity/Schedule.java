@@ -13,11 +13,11 @@ public class Schedule extends BaseEntity {
 
     private Long seasonId;
 
+    private Long stadiumId;
+
     private String scheduleName;
 
     private String status;
-
-    private String location;
 
     private LocalDateTime startTime;
 }
