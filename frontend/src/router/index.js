@@ -7,6 +7,7 @@ const MatchList = () => import('@/views/MatchList.vue')
 const SeasonList = () => import('@/views/SeasonList.vue')
 const OrganizationList = () => import('@/views/OrganizationList.vue')
 const PersonnelList = () => import('@/views/PersonnelList.vue')
+const PlayerList = () => import('@/views/PlayerList.vue')
 const Login = () => import('@/views/Login.vue')
 const Register = () => import('@/views/Register.vue')
 
@@ -45,6 +46,12 @@ const routes = [
         name: 'PersonnelList',
         component: PersonnelList,
         meta: { title: '人员管理', requiresAuth: true }
+      },
+      {
+        path: 'player/list',
+        name: 'PlayerList',
+        component: PlayerList,
+        meta: { title: '球员管理', requiresAuth: true }
       }
     ]
   },

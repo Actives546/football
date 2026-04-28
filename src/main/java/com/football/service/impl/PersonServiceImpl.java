@@ -22,6 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 人员管理服务实现类
+ * 实现人员信息的增删改查业务逻辑
+ *
+ * @author system
+ * @version 1.0.0
+ */
 @Slf4j
 @Service
 public class PersonServiceImpl implements PersonService {
@@ -31,6 +38,16 @@ public class PersonServiceImpl implements PersonService {
 
     @Autowired
     private OrganizationMapper organizationMapper;
+
+    /**
+     * 人员类型常量：普通人员
+     */
+    private static final String PERSON_TYPE_PERSON = "PERSON";
+
+    /**
+     * 人员类型常量：球员
+     */
+    private static final String PERSON_TYPE_PLAYER = "PLAYER";
 
     @Override
     public Result<PersonVO> getById(Long id) {
@@ -109,6 +126,13 @@ public class PersonServiceImpl implements PersonService {
         return Result.success("查询成功", list);
     }
 
+    /**
+     * 验证人员ID并获取人员信息
+     *
+     * @param id 人员ID
+     * @return 人员信息VO
+     * @throws BusinessException 当ID为空或人员不存在时抛出
+     */
     private PersonVO validateAndGetPerson(Long id) {
         if (id == null) {
             throw new BusinessException("人员ID不能为空");
@@ -120,6 +144,12 @@ public class PersonServiceImpl implements PersonService {
         return person;
     }
 
+    /**
+     * 验证分页参数
+     * 如果分页参数不合法，则设置默认值
+     *
+     * @param queryDTO 查询条件DTO
+     */
     private void validatePaginationParams(PersonQueryDTO queryDTO) {
         if (queryDTO.getPageNum() == null || queryDTO.getPageNum() <= 0) {
             queryDTO.setPageNum(1);
@@ -129,11 +159,25 @@ public class PersonServiceImpl implements PersonService {
         }
     }
 
+    /**
+     * 验证人员数据
+     * 包括人员DTO验证和部门存在性验证
+     *
+     * @param personDTO 人员信息DTO
+     */
     private void validatePersonData(PersonDTO personDTO) {
         validatePersonDTO(personDTO);
         validateOrgExist(personDTO.getOrgId());
     }
 
+    /**
+     * 构建分页结果Map
+     *
+     * @param queryDTO 查询条件DTO
+     * @param list     数据列表
+     * @param total    总记录数
+     * @return 包含分页信息的Map
+     */
     private Map<String, Object> buildPageResult(PersonQueryDTO queryDTO, List<PersonVO> list, long total) {
         Map<String, Object> result = new HashMap<>();
         result.put("list", list);
@@ -143,6 +187,12 @@ public class PersonServiceImpl implements PersonService {
         return result;
     }
 
+    /**
+     * 验证人员DTO的必填字段
+     *
+     * @param personDTO 人员信息DTO
+     * @throws BusinessException 当必填字段为空或人员类型不合法时抛出
+     */
     private void validatePersonDTO(PersonDTO personDTO) {
         if (!StringUtils.hasText(personDTO.getPersonName())) {
             throw new BusinessException("人员姓名不能为空");
@@ -150,11 +200,18 @@ public class PersonServiceImpl implements PersonService {
         if (!StringUtils.hasText(personDTO.getPersonType())) {
             throw new BusinessException("人员类型不能为空");
         }
-        if (!"PERSON".equals(personDTO.getPersonType()) && !"PLAYER".equals(personDTO.getPersonType())) {
+        if (!PERSON_TYPE_PERSON.equals(personDTO.getPersonType()) 
+                && !PERSON_TYPE_PLAYER.equals(personDTO.getPersonType())) {
             throw new BusinessException("人员类型不合法");
         }
     }
 
+    /**
+     * 验证部门是否存在
+     *
+     * @param orgId 部门ID
+     * @throws BusinessException 当部门ID为空或部门不存在时抛出
+     */
     private void validateOrgExist(Long orgId) {
         if (orgId == null) {
             throw new BusinessException("所属部门不能为空");
@@ -165,6 +222,12 @@ public class PersonServiceImpl implements PersonService {
         }
     }
 
+    /**
+     * 将PersonDTO转换为Person实体
+     *
+     * @param dto 人员信息DTO
+     * @return Person实体对象
+     */
     private Person convertToEntity(PersonDTO dto) {
         Person person = new Person();
         BeanUtils.copyProperties(dto, person);
