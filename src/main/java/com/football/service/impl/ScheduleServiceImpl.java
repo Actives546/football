@@ -7,9 +7,11 @@ import com.football.dto.ScheduleQueryDTO;
 import com.football.entity.Schedule;
 import com.football.mapper.ScheduleMapper;
 import com.football.mapper.SeasonMapper;
+import com.football.mapper.StadiumMapper;
 import com.football.service.ScheduleService;
 import com.football.vo.ScheduleVO;
 import com.football.vo.SeasonVO;
+import com.football.vo.StadiumVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Autowired
     private SeasonMapper seasonMapper;
+
+    @Autowired
+    private StadiumMapper stadiumMapper;
 
     private static final String STATUS_SCHEDULED = "SCHEDULED";
     private static final String STATUS_LIVE = "LIVE";
@@ -74,6 +79,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     public Result<Boolean> add(ScheduleDTO scheduleDTO) {
         validateScheduleDTO(scheduleDTO);
         validateSeasonExist(scheduleDTO.getSeasonId());
+        validateStadiumExist(scheduleDTO.getStadiumId());
 
         Schedule schedule = convertToEntity(scheduleDTO);
 
@@ -101,6 +107,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         validateScheduleDTO(scheduleDTO);
         validateSeasonExist(scheduleDTO.getSeasonId());
+        validateStadiumExist(scheduleDTO.getStadiumId());
 
         Schedule schedule = convertToEntity(scheduleDTO);
 
@@ -166,6 +173,19 @@ public class ScheduleServiceImpl implements ScheduleService {
         SeasonVO season = seasonMapper.selectById(seasonId);
         if (season == null) {
             throw new BusinessException("所属赛季不存在");
+        }
+    }
+
+    private void validateStadiumExist(Long stadiumId) {
+        if (stadiumId == null) {
+            return;
+        }
+        StadiumVO stadium = stadiumMapper.selectById(stadiumId);
+        if (stadium == null) {
+            throw new BusinessException("比赛场地不存在");
+        }
+        if (stadium.getStatus() != 1) {
+            throw new BusinessException("比赛场地已被禁用");
         }
     }
 

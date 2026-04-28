@@ -49,14 +49,22 @@
             </el-form-item>
           </div>
           <div class="search-item">
-            <el-form-item label="比赛地点" class="form-item">
-              <el-input
-                v-model="searchForm.location"
-                placeholder="请输入比赛地点"
+            <el-form-item label="比赛场地" class="form-item">
+              <el-select
+                v-model="searchForm.stadiumId"
+                placeholder="请选择场地"
                 clearable
-                class="search-input"
-                @keyup.enter="handleSearch"
-              />
+                filterable
+                class="search-select"
+                @change="handleSearch"
+              >
+                <el-option
+                  v-for="item in stadiumOptions"
+                  :key="item.id"
+                  :label="item.stadiumName"
+                  :value="item.id"
+                />
+              </el-select>
             </el-form-item>
           </div>
           <div class="search-item">
@@ -146,11 +154,21 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="location" label="比赛地点" min-width="120" show-overflow-tooltip>
+        <el-table-column prop="stadiumName" label="比赛场地" min-width="140" show-overflow-tooltip>
           <template #default="{ row }">
-            <div class="location-cell">
-              <el-icon class="location-icon"><Location /></el-icon>
-              <span class="location-text">{{ row.location || '-' }}</span>
+            <div class="stadium-cell">
+              <el-tag 
+                v-if="row.stadiumName" 
+                size="small" 
+                type="warning" 
+                effect="light"
+                :style="{ cursor: 'pointer' }"
+                @click="showStadiumDetail(row)"
+              >
+                <el-icon :size="12"><Location /></el-icon>
+                {{ row.stadiumName }}
+              </el-tag>
+              <span v-else class="empty-text">-</span>
             </div>
           </template>
         </el-table-column>
@@ -205,7 +223,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="680px"
+      width="720px"
       :close-on-click-modal="false"
       destroy-on-close
       class="schedule-dialog"
@@ -262,8 +280,26 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="比赛地点">
-                    <el-input v-model="formData.location" placeholder="请输入比赛地点（可选）" class="form-input" />
+                  <el-form-item label="比赛场地">
+                    <el-select
+                      v-model="formData.stadiumId"
+                      placeholder="请选择比赛场地（可选）"
+                      filterable
+                      class="form-select"
+                      clearable
+                    >
+                      <el-option
+                        v-for="item in stadiumOptions"
+                        :key="item.id"
+                        :label="item.stadiumName"
+                        :value="item.id"
+                      >
+                        <div class="stadium-option">
+                          <span class="stadium-option-name">{{ item.stadiumName }}</span>
+                          <span class="stadium-option-info" v-if="item.address">{{ item.address }}</span>
+                        </div>
+                      </el-option>
+                    </el-select>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -283,10 +319,77 @@
           </div>
         </div>
         
+        <div class="form-section" v-if="selectedStadium && !isView">
+          <div class="section-header">
+            <div class="section-icon" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">
+              <el-icon :size="18"><Location /></el-icon>
+            </div>
+            <span class="section-title">场地详情</span>
+          </div>
+          <div class="section-body">
+            <el-descriptions :column="2" border class="stadium-descriptions" :model="selectedStadium">
+              <el-descriptions-item label="场地名称">
+                <span class="stadium-detail-name">{{ selectedStadium.stadiumName }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="容纳人数">
+                <span class="stadium-detail-value">{{ formatCapacity(selectedStadium.capacity) }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="详细地址" :span="2">
+                <span class="stadium-detail-value">{{ selectedStadium.address || '-' }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="联系电话">
+                <span class="stadium-detail-value">{{ selectedStadium.contactPhone || '-' }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="状态">
+                <el-tag :type="selectedStadium.status === 1 ? 'success' : 'danger'" size="small">
+                  {{ selectedStadium.status === 1 ? '启用' : '禁用' }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="备注" :span="2" v-if="selectedStadium.remark">
+                <span class="stadium-detail-value">{{ selectedStadium.remark }}</span>
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
+        </div>
+        
         <div class="form-section" v-if="isView && currentSchedule">
           <div class="section-header">
             <div class="section-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
               <el-icon :size="18"><Clock /></el-icon>
+            </div>
+            <span class="section-title">场地信息</span>
+          </div>
+          <div class="section-body" v-if="currentSchedule.stadiumName">
+            <el-descriptions :column="2" border class="stadium-descriptions">
+              <el-descriptions-item label="场地名称">
+                <span class="stadium-detail-name">{{ currentSchedule.stadiumName }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="容纳人数">
+                <span class="stadium-detail-value">{{ formatCapacity(currentSchedule.stadiumCapacity) }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="详细地址" :span="2">
+                <span class="stadium-detail-value">{{ currentSchedule.stadiumAddress || '-' }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="联系电话">
+                <span class="stadium-detail-value">{{ currentSchedule.stadiumContactPhone || '-' }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="状态">
+                <el-tag :type="currentSchedule.stadiumStatus === 1 ? 'success' : 'danger'" size="small">
+                  {{ currentSchedule.stadiumStatus === 1 ? '启用' : '禁用' }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="备注" :span="2" v-if="currentSchedule.stadiumRemark">
+                <span class="stadium-detail-value">{{ currentSchedule.stadiumRemark }}</span>
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <el-empty v-else description="暂无场地信息" :image-size="60" style="padding: 20px 0;" />
+        </div>
+        
+        <div class="form-section" v-if="isView && currentSchedule">
+          <div class="section-header">
+            <div class="section-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
+              <el-icon :size="18"><InfoFilled /></el-icon>
             </div>
             <span class="section-title">系统信息</span>
           </div>
@@ -316,45 +419,32 @@
     </el-dialog>
     
     <el-dialog
-      v-model="detailVisible"
-      title="赛程详情"
-      width="600px"
+      v-model="stadiumDetailVisible"
+      title="场地详情"
+      width="560px"
       destroy-on-close
-      class="detail-dialog"
+      class="stadium-detail-dialog"
     >
-      <el-descriptions :column="2" border v-if="currentSchedule" class="detail-descriptions">
-        <el-descriptions-item label="赛程ID" :span="1">
-          <span class="detail-value">{{ currentSchedule.id }}</span>
+      <el-descriptions :column="2" border class="stadium-descriptions" v-if="selectedStadium">
+        <el-descriptions-item label="场地名称">
+          <span class="stadium-detail-name">{{ selectedStadium.stadiumName }}</span>
         </el-descriptions-item>
-        <el-descriptions-item label="所属赛事" :span="1">
-          <el-tag size="small" type="primary">
-            {{ currentSchedule.matchName }}
+        <el-descriptions-item label="容纳人数">
+          <span class="stadium-detail-value">{{ formatCapacity(selectedStadium.capacity) }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="详细地址" :span="2">
+          <span class="stadium-detail-value">{{ selectedStadium.address || '-' }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="联系电话">
+          <span class="stadium-detail-value">{{ selectedStadium.contactPhone || '-' }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag :type="selectedStadium.status === 1 ? 'success' : 'danger'" size="small">
+            {{ selectedStadium.status === 1 ? '启用' : '禁用' }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="所属赛季" :span="1">
-          <el-tag size="small" type="success">
-            {{ currentSchedule.seasonName }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="赛程状态" :span="1">
-          <el-tag :type="getStatusType(currentSchedule.status)" size="small">
-            {{ getStatusText(currentSchedule.status) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="赛程名称" :span="2">
-          <span class="detail-value">{{ currentSchedule.scheduleName }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="比赛地点" :span="1">
-          <span class="detail-text">{{ currentSchedule.location || '-' }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="开始时间" :span="1">
-          <span class="detail-time">{{ formatDateTime(currentSchedule.startTime) }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="创建时间" :span="1">
-          <span class="detail-time">{{ formatDateTime(currentSchedule.createTime) }}</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="更新时间" :span="1">
-          <span class="detail-time">{{ formatDateTime(currentSchedule.updateTime) }}</span>
+        <el-descriptions-item label="备注" :span="2" v-if="selectedStadium.remark">
+          <span class="stadium-detail-value">{{ selectedStadium.remark }}</span>
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
@@ -374,6 +464,7 @@ import {
   deleteScheduleBatch
 } from '@/api/schedule'
 import { getSeasonPage } from '@/api/season'
+import { getStadiumEnabled } from '@/api/stadium'
 import {
   Search,
   Refresh,
@@ -393,13 +484,15 @@ const loading = ref(false)
 const formLoading = ref(false)
 const submitLoading = ref(false)
 const dialogVisible = ref(false)
-const detailVisible = ref(false)
+const stadiumDetailVisible = ref(false)
 const isView = ref(false)
 const currentSchedule = ref(null)
+const selectedStadium = ref(null)
 const multipleSelection = ref([])
 const tableData = ref([])
 const total = ref(0)
 const seasonOptions = ref([])
+const stadiumOptions = ref([])
 const tableRef = ref(null)
 const formRef = ref(null)
 
@@ -413,9 +506,9 @@ const currentSeasonName = computed(() => {
 
 const searchForm = reactive({
   seasonId: null,
+  stadiumId: null,
   scheduleName: '',
-  status: '',
-  location: ''
+  status: ''
 })
 
 const pagination = reactive({
@@ -426,9 +519,9 @@ const pagination = reactive({
 const formData = reactive({
   id: null,
   seasonId: null,
+  stadiumId: null,
   scheduleName: '',
   status: 'SCHEDULED',
-  location: '',
   startTime: null
 })
 
@@ -495,6 +588,11 @@ const formatDateTime = (date) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
+const formatCapacity = (capacity) => {
+  if (capacity === null || capacity === undefined) return '-'
+  return capacity.toLocaleString() + ' 人'
+}
+
 const getIndex = (index) => {
   return (pagination.pageNum - 1) * pagination.pageSize + index + 1
 }
@@ -508,14 +606,23 @@ const loadSeasonOptions = async () => {
   }
 }
 
+const loadStadiumOptions = async () => {
+  try {
+    const res = await getStadiumEnabled()
+    stadiumOptions.value = res.data || []
+  } catch (error) {
+    console.error('加载场地列表失败:', error)
+  }
+}
+
 const loadTableData = async () => {
   loading.value = true
   try {
     const params = {
       seasonId: searchForm.seasonId,
+      stadiumId: searchForm.stadiumId,
       scheduleName: searchForm.scheduleName,
       status: searchForm.status,
-      location: searchForm.location,
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize
     }
@@ -537,9 +644,9 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchForm.seasonId = null
+  searchForm.stadiumId = null
   searchForm.scheduleName = ''
   searchForm.status = ''
-  searchForm.location = ''
   handleSearch()
 }
 
@@ -560,10 +667,11 @@ const handleSelectionChange = (val) => {
 const resetForm = () => {
   formData.id = null
   formData.seasonId = searchForm.seasonId || null
+  formData.stadiumId = null
   formData.scheduleName = ''
   formData.status = 'SCHEDULED'
-  formData.location = ''
   formData.startTime = null
+  selectedStadium.value = null
 }
 
 const handleAdd = () => {
@@ -577,6 +685,12 @@ const handleEdit = (row) => {
   resetForm()
   isView.value = false
   Object.assign(formData, row)
+  if (row.stadiumId) {
+    const stadium = stadiumOptions.value.find(s => s.id === row.stadiumId)
+    if (stadium) {
+      selectedStadium.value = stadium
+    }
+  }
   if (row.startTime) {
     formData.startTime = formatDateTime(row.startTime)
   }
@@ -598,6 +712,19 @@ const handleView = async (row) => {
     ElMessage.error('获取详情失败')
     console.error(error)
   }
+}
+
+const showStadiumDetail = (row) => {
+  if (!row.stadiumId) return
+  selectedStadium.value = {
+    stadiumName: row.stadiumName,
+    address: row.stadiumAddress,
+    capacity: row.stadiumCapacity,
+    contactPhone: row.stadiumContactPhone,
+    status: row.stadiumStatus,
+    remark: row.stadiumRemark
+  }
+  stadiumDetailVisible.value = true
 }
 
 const handleDelete = (row) => {
@@ -660,6 +787,15 @@ const handleSubmit = async () => {
   }
 }
 
+watch(() => formData.stadiumId, (newStadiumId) => {
+  if (newStadiumId) {
+    const stadium = stadiumOptions.value.find(s => s.id === newStadiumId)
+    selectedStadium.value = stadium || null
+  } else {
+    selectedStadium.value = null
+  }
+})
+
 watch(() => route.query, (query) => {
   if (query.seasonId) {
     searchForm.seasonId = Number(query.seasonId)
@@ -669,6 +805,7 @@ watch(() => route.query, (query) => {
 
 onMounted(() => {
   loadSeasonOptions()
+  loadStadiumOptions()
   loadTableData()
 })
 </script>
@@ -843,20 +980,27 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.location-cell {
+.stadium-cell {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.location-icon {
-  color: #f97316;
+.stadium-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stadium-option-name {
+  font-weight: 500;
+  color: #1e293b;
   font-size: 14px;
 }
 
-.location-text {
-  color: #64748b;
-  font-size: 13px;
+.stadium-option-info {
+  font-size: 12px;
+  color: #909399;
 }
 
 .time-text {
@@ -962,6 +1106,31 @@ onMounted(() => {
   resize: none;
 }
 
+.stadium-descriptions {
+  width: 100%;
+}
+
+.stadium-descriptions :deep(.el-descriptions__label) {
+  font-weight: 500;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.stadium-descriptions :deep(.el-descriptions__content) {
+  color: #1e293b;
+}
+
+.stadium-detail-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.stadium-detail-value {
+  font-size: 14px;
+  color: #475569;
+}
+
 .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1014,40 +1183,26 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
-.detail-dialog :deep(.el-dialog) {
+.stadium-detail-dialog :deep(.el-dialog) {
   border-radius: 16px;
+  overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-.detail-descriptions :deep(.el-descriptions__label) {
-  font-weight: 500;
-  color: #64748b;
-  background: #f8fafc;
+.stadium-detail-dialog :deep(.el-dialog__header) {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(to right, #f8fafc, #ffffff);
 }
 
-.detail-descriptions :deep(.el-descriptions__content) {
-  color: #1e293b;
-}
-
-.detail-value {
-  font-size: 15px;
+.stadium-detail-dialog :deep(.el-dialog__title) {
+  font-size: 18px;
   font-weight: 600;
   color: #1e293b;
 }
 
-.detail-text {
-  font-size: 14px;
-  color: #475569;
-}
-
-.detail-time {
-  font-size: 13px;
-  color: #64748b;
-}
-
-.detail-desc {
-  font-size: 14px;
-  color: #475569;
-  line-height: 1.6;
+.stadium-detail-dialog :deep(.el-dialog__body) {
+  padding: 24px;
+  background: #fafafa;
 }
 </style>

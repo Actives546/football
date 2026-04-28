@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.football.mapper.StadiumMapper">
+
+    <resultMap id="BaseResultMap" type="com.football.vo.StadiumVO">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="stadium_name" property="stadiumName" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="capacity" property="capacity" jdbcType="INTEGER"/>
+        <result column="contact_phone" property="contactPhone" jdbcType="VARCHAR"/>
+        <result column="photo_url" property="photoUrl" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, stadium_name, address, capacity, contact_phone, photo_url, 
+        status, remark, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `stadium`
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `stadium`
+        WHERE deleted = 0
+        <if test="query.stadiumName != null and query.stadiumName != ''">
+            AND stadium_name LIKE CONCAT('%', #{query.stadiumName}, '%')
+        </if>
+        <if test="query.address != null and query.address != ''">
+            AND address LIKE CONCAT('%', #{query.address}, '%')
+        </if>
+        <if test="query.status != null">
+            AND status = #{query.status}
+        </if>
+        ORDER BY create_time DESC
+        <if test="query.pageNum != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{query.offset}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM `stadium`
+        WHERE deleted = 0
+        <if test="query.stadiumName != null and query.stadiumName != ''">
+            AND stadium_name LIKE CONCAT('%', #{query.stadiumName}, '%')
+        </if>
+        <if test="query.address != null and query.address != ''">
+            AND address LIKE CONCAT('%', #{query.address}, '%')
+        </if>
+        <if test="query.status != null">
+            AND status = #{query.status}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.football.entity.Stadium" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `stadium` (
+            stadium_name, address, capacity, contact_phone, photo_url,
+            status, remark, create_time, update_time, deleted
+        ) VALUES (
+            #{stadiumName}, #{address}, #{capacity}, #{contactPhone}, #{photoUrl},
+            #{status}, #{remark}, NOW(), NOW(), 0
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.football.entity.Stadium">
+        UPDATE `stadium`
+        SET
+            stadium_name = #{stadiumName},
+            address = #{address},
+            capacity = #{capacity},
+            contact_phone = #{contactPhone},
+            photo_url = #{photoUrl},
+            status = #{status},
+            remark = #{remark},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE `stadium`
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE `stadium`
+        SET deleted = 1, update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `stadium`
+        WHERE deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `stadium`
+        WHERE deleted = 0 AND status = #{status}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `stadium`
+        WHERE stadium_name = #{stadiumName} AND deleted = 0
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+        LIMIT 1
+    </select>
+
+</mapper>
