@@ -14,6 +14,7 @@ public class ScheduleDTO {
     @NotNull(message = "所属赛季不能为空")
     private Long seasonId;
 
+    @NotNull(message = "比赛场地不能为空")
     private Long stadiumId;
 
     @NotBlank(message = "赛程名称不能为空")

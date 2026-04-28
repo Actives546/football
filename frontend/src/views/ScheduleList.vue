@@ -529,6 +529,9 @@ const formRules = {
   seasonId: [
     { required: true, message: '请选择所属赛季', trigger: 'change' }
   ],
+  stadiumId: [
+    { required: true, message: '请选择比赛场地', trigger: 'change' }
+  ],
   scheduleName: [
     { required: true, message: '请输入赛程名称', trigger: 'blur' }
   ],
