@@ -58,6 +58,10 @@
             <el-icon><UserFilled /></el-icon>
             <template #title>人员管理</template>
           </el-menu-item>
+          <el-menu-item index="/team/list">
+            <el-icon><Trophy /></el-icon>
+            <template #title>球队管理</template>
+          </el-menu-item>
           <el-menu-item index="/player/list">
             <el-icon><User /></el-icon>
             <template #title>球员管理</template>
