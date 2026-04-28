@@ -47,6 +47,10 @@
             <el-icon><Timer /></el-icon>
             <template #title>赛程信息管理</template>
           </el-menu-item>
+          <el-menu-item index="/stadium/list">
+            <el-icon><Location /></el-icon>
+            <template #title>场地管理</template>
+          </el-menu-item>
         </el-sub-menu>
         
         <el-sub-menu index="personnel">
@@ -140,7 +144,8 @@ import {
   ArrowDown,
   SwitchButton,
   Football,
-  OfficeBuilding
+  OfficeBuilding,
+  Location
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

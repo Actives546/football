@@ -178,7 +178,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     private void validateStadiumExist(Long stadiumId) {
         if (stadiumId == null) {
-            return;
+            throw new BusinessException("比赛场地不能为空");
         }
         StadiumVO stadium = stadiumMapper.selectById(stadiumId);
         if (stadium == null) {
