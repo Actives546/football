@@ -236,150 +236,497 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="680px"
+      :width="isView ? '800px' : '680px'"
       :close-on-click-modal="false"
       destroy-on-close
       class="personnel-dialog"
     >
       <div class="dialog-content" v-loading="formLoading">
-        <div class="form-section">
-          <div class="section-header">
-            <div class="section-icon">
-              <el-icon :size="18"><InfoFilled /></el-icon>
+        <div v-if="isView && currentPerson" class="detail-view-container">
+          <div class="detail-header-card">
+            <div class="detail-avatar-section">
+              <el-avatar :size="80" class="detail-avatar">
+                <el-icon :size="40"><UserFilled /></el-icon>
+              </el-avatar>
+              <div class="detail-basic-info">
+                <div class="detail-name-row">
+                  <span class="detail-name">{{ currentPerson.personName }}</span>
+                  <el-tag :type="getPersonTypeTagType(currentPerson.personType)" size="large" effect="dark">
+                    {{ getPersonTypeText(currentPerson.personType) }}
+                  </el-tag>
+                </div>
+                <div class="detail-sub-info">
+                  <span class="detail-org">
+                    <el-icon><Folder /></el-icon>
+                    {{ currentPerson.orgName || '-' }}
+                  </span>
+                  <span class="detail-status">
+                    <el-tag :type="currentPerson.status === 1 ? 'success' : 'danger'" size="small" effect="light">
+                      {{ getStatusText(currentPerson.status) }}
+                    </el-tag>
+                  </span>
+                </div>
+              </div>
             </div>
-            <span class="section-title">基本信息</span>
           </div>
-          <div class="section-body">
-            <el-form
-              ref="formRef"
-              :model="formData"
-              :rules="formRules"
-              label-width="100px"
-              class="personnel-form"
-            >
-              <el-row :gutter="24">
-                <el-col :span="12">
-                  <el-form-item label="人员姓名" prop="personName">
-                    <el-input v-model="formData.personName" placeholder="请输入人员姓名" class="form-input" :disabled="isView" />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item label="人员类型" prop="personType">
-                    <el-select v-model="formData.personType" placeholder="请选择人员类型" class="form-select" :disabled="isView">
-                      <el-option
-                        v-for="item in personTypeOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                      />
-                    </el-select>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              
-              <el-row :gutter="24">
-                <el-col :span="12">
-                  <el-form-item label="所属部门" prop="orgId">
-                    <el-tree-select
-                      v-model="formData.orgId"
-                      :data="orgOptions"
-                      :props="treeProps"
-                      placeholder="请选择所属部门"
-                      check-strictly
-                      filterable
-                      class="form-select"
-                      :disabled="isView"
-                    />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item label="手机号">
-                    <el-input v-model="formData.phone" placeholder="请输入手机号" class="form-input" :disabled="isView" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              
-              <el-row :gutter="24">
-                <el-col :span="12">
-                  <el-form-item label="邮箱">
-                    <el-input v-model="formData.email" placeholder="请输入邮箱" class="form-input" :disabled="isView" />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item label="身份证号">
-                    <el-input v-model="formData.idCard" placeholder="请输入身份证号" class="form-input" maxlength="18" :disabled="isView" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              
-              <el-row :gutter="24">
-                <el-col :span="12">
-                  <el-form-item label="性别">
-                    <el-radio-group v-model="formData.gender" :disabled="isView">
-                      <el-radio :value="1">男</el-radio>
-                      <el-radio :value="2">女</el-radio>
-                      <el-radio :value="0">未知</el-radio>
-                    </el-radio-group>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item label="出生日期">
-                    <el-date-picker
-                      v-model="formData.birthday"
-                      type="date"
-                      placeholder="请选择出生日期"
-                      value-format="YYYY-MM-DD"
-                      class="form-select"
-                      :disabled="isView"
-                    />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              
-              <el-row :gutter="24">
-                <el-col :span="12">
-                  <el-form-item label="状态">
-                    <el-radio-group v-model="formData.status" :disabled="isView">
-                      <el-radio :value="1">正常</el-radio>
-                      <el-radio :value="0">禁用</el-radio>
-                    </el-radio-group>
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item label="头像">
-                    <el-input v-model="formData.avatar" placeholder="请输入头像URL（可选）" class="form-input" :disabled="isView" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              
-              <el-form-item label="地址">
-                <el-input v-model="formData.address" type="textarea" :rows="2" placeholder="请输入地址（可选）" class="form-textarea" :disabled="isView" />
-              </el-form-item>
-              
-              <el-form-item label="备注">
-                <el-input v-model="formData.remark" type="textarea" :rows="3" placeholder="请输入备注（可选）" class="form-textarea" :disabled="isView" />
-              </el-form-item>
-            </el-form>
-          </div>
+
+          <el-tabs v-model="activeTab" class="detail-tabs">
+            <el-tab-pane label="基本信息" name="basic">
+              <div class="detail-section">
+                <div class="detail-section-header">
+                  <div class="detail-section-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                    <el-icon :size="16"><InfoFilled /></el-icon>
+                  </div>
+                  <span class="detail-section-title">联系方式</span>
+                </div>
+                <div class="detail-info-grid">
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #3b82f6;">
+                      <el-icon><Phone /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">手机号</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.phone) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #10b981;">
+                      <el-icon><Message /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">邮箱</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.email) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #f59e0b;">
+                      <el-icon><Location /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">地址</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.address) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #ef4444;">
+                      <el-icon><Document /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">身份证号</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.idCard) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <div class="detail-section-header">
+                  <div class="detail-section-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <el-icon :size="16"><UserFilled /></el-icon>
+                  </div>
+                  <span class="detail-section-title">个人信息</span>
+                </div>
+                <div class="detail-info-grid">
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #8b5cf6;">
+                      <el-icon><UserFilled /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">性别</span>
+                      <span class="detail-info-value">{{ getGenderText(currentPerson.gender) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #ec4899;">
+                      <el-icon><Calendar /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">出生日期</span>
+                      <span class="detail-info-value">{{ formatDate(currentPerson.birthday) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </el-tab-pane>
+
+            <el-tab-pane label="详细信息" name="detail">
+              <div class="detail-section">
+                <div class="detail-section-header">
+                  <div class="detail-section-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
+                    <el-icon :size="16"><Briefcase /></el-icon>
+                  </div>
+                  <span class="detail-section-title">工作信息</span>
+                </div>
+                <div class="detail-info-grid">
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #8b5cf6;">
+                      <el-icon><Briefcase /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">职位</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.position) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #06b6d4;">
+                      <el-icon><Calendar /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">入职日期</span>
+                      <span class="detail-info-value">{{ formatDate(currentPerson.joinDate) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #14b8a6;">
+                      <el-icon><School /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">学历</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.education) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #f97316;">
+                      <el-icon><Document /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">专业</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.major) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #64748b;">
+                      <el-icon><School /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">毕业院校</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.school) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <div class="detail-section-header">
+                  <div class="detail-section-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <el-icon :size="16"><Warning /></el-icon>
+                  </div>
+                  <span class="detail-section-title">紧急联系人</span>
+                </div>
+                <div class="detail-info-grid">
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #ef4444;">
+                      <el-icon><UserFilled /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">联系人</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.emergencyContact) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #f97316;">
+                      <el-icon><Phone /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">联系电话</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.emergencyPhone) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section" v-if="currentPerson.workExperience || currentPerson.detailRemark">
+                <div class="detail-section-header">
+                  <div class="detail-section-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                    <el-icon :size="16"><Document /></el-icon>
+                  </div>
+                  <span class="detail-section-title">其他信息</span>
+                </div>
+                <div class="detail-text-section" v-if="currentPerson.workExperience">
+                  <span class="detail-text-label">工作经验</span>
+                  <p class="detail-text-content">{{ currentPerson.workExperience }}</p>
+                </div>
+                <div class="detail-text-section" v-if="currentPerson.detailRemark">
+                  <span class="detail-text-label">备注</span>
+                  <p class="detail-text-content">{{ currentPerson.detailRemark }}</p>
+                </div>
+              </div>
+            </el-tab-pane>
+
+            <el-tab-pane label="球员信息" name="player" v-if="currentPerson.personType === 'PLAYER'">
+              <div class="detail-section">
+                <div class="detail-section-header">
+                  <div class="detail-section-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <el-icon :size="16"><Medal /></el-icon>
+                  </div>
+                  <span class="detail-section-title">球员基本信息</span>
+                </div>
+                <div class="detail-info-grid">
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #10b981;">
+                      <el-icon><Medal /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">球衣号码</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.jerseyNumber) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #3b82f6;">
+                      <el-icon><Location /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">场上位置</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.fieldPosition) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #8b5cf6;">
+                      <el-icon><DataLine /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">身高</span>
+                      <span class="detail-info-value">{{ currentPerson.height ? currentPerson.height + ' cm' : '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #ec4899;">
+                      <el-icon><DataLine /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">体重</span>
+                      <span class="detail-info-value">{{ currentPerson.weight ? currentPerson.weight + ' kg' : '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #f59e0b;">
+                      <el-icon><Footed /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">惯用脚</span>
+                      <span class="detail-info-value">{{ getPreferredFootText(currentPerson.preferredFoot) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #ef4444;">
+                      <el-icon><Flag /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">国籍</span>
+                      <span class="detail-info-value">{{ formatValue(currentPerson.nationality) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <div class="detail-section-header">
+                  <div class="detail-section-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <el-icon :size="16"><Timer /></el-icon>
+                  </div>
+                  <span class="detail-section-title">合同信息</span>
+                </div>
+                <div class="detail-info-grid">
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #10b981;">
+                      <el-icon><Calendar /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">入队日期</span>
+                      <span class="detail-info-value">{{ formatDate(currentPerson.teamJoinDate) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #ef4444;">
+                      <el-icon><Calendar /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">合同到期</span>
+                      <span class="detail-info-value">{{ formatDate(currentPerson.contractEndDate) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #8b5cf6;">
+                      <el-icon><Money /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">身价</span>
+                      <span class="detail-info-value">{{ currentPerson.marketValue ? currentPerson.marketValue + ' 万' : '-' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section" v-if="currentPerson.technicalFeatures || currentPerson.pastExperience">
+                <div class="detail-section-header">
+                  <div class="detail-section-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                    <el-icon :size="16"><Document /></el-icon>
+                  </div>
+                  <span class="detail-section-title">球员描述</span>
+                </div>
+                <div class="detail-text-section" v-if="currentPerson.technicalFeatures">
+                  <span class="detail-text-label">技术特点</span>
+                  <p class="detail-text-content">{{ currentPerson.technicalFeatures }}</p>
+                </div>
+                <div class="detail-text-section" v-if="currentPerson.pastExperience">
+                  <span class="detail-text-label">过往经历</span>
+                  <p class="detail-text-content">{{ currentPerson.pastExperience }}</p>
+                </div>
+              </div>
+            </el-tab-pane>
+
+            <el-tab-pane label="系统信息" name="system">
+              <div class="detail-section">
+                <div class="detail-section-header">
+                  <div class="detail-section-icon" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);">
+                    <el-icon :size="16"><Clock /></el-icon>
+                  </div>
+                  <span class="detail-section-title">系统记录</span>
+                </div>
+                <div class="detail-info-grid">
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #10b981;">
+                      <el-icon><Clock /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">创建时间</span>
+                      <span class="detail-info-value">{{ formatDateTime(currentPerson.createTime) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-item">
+                    <div class="detail-info-icon" style="color: #3b82f6;">
+                      <el-icon><Clock /></el-icon>
+                    </div>
+                    <div class="detail-info-content">
+                      <span class="detail-info-label">更新时间</span>
+                      <span class="detail-info-value">{{ formatDateTime(currentPerson.updateTime) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
         </div>
-        
-        <div class="form-section" v-if="isView && currentPerson">
-          <div class="section-header">
-            <div class="section-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-              <el-icon :size="18"><Clock /></el-icon>
+
+        <div v-else>
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <el-icon :size="18"><InfoFilled /></el-icon>
+              </div>
+              <span class="section-title">基本信息</span>
             </div>
-            <span class="section-title">系统信息</span>
-          </div>
-          <div class="section-body">
-            <div class="info-grid">
-              <div class="info-item">
-                <span class="info-label">创建时间</span>
-                <span class="info-value">{{ formatDateTime(currentPerson.createTime) }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">更新时间</span>
-                <span class="info-value">{{ formatDateTime(currentPerson.updateTime) }}</span>
-              </div>
+            <div class="section-body">
+              <el-form
+                ref="formRef"
+                :model="formData"
+                :rules="formRules"
+                label-width="100px"
+                class="personnel-form"
+              >
+                <el-row :gutter="24">
+                  <el-col :span="12">
+                    <el-form-item label="人员姓名" prop="personName">
+                      <el-input v-model="formData.personName" placeholder="请输入人员姓名" class="form-input" :disabled="isView" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="人员类型" prop="personType">
+                      <el-select v-model="formData.personType" placeholder="请选择人员类型" class="form-select" :disabled="isView">
+                        <el-option
+                          v-for="item in personTypeOptions"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                
+                <el-row :gutter="24">
+                  <el-col :span="12">
+                    <el-form-item label="所属部门" prop="orgId">
+                      <el-tree-select
+                        v-model="formData.orgId"
+                        :data="orgOptions"
+                        :props="treeProps"
+                        placeholder="请选择所属部门"
+                        check-strictly
+                        filterable
+                        class="form-select"
+                        :disabled="isView"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="手机号">
+                      <el-input v-model="formData.phone" placeholder="请输入手机号" class="form-input" :disabled="isView" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                
+                <el-row :gutter="24">
+                  <el-col :span="12">
+                    <el-form-item label="邮箱">
+                      <el-input v-model="formData.email" placeholder="请输入邮箱" class="form-input" :disabled="isView" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="身份证号">
+                      <el-input v-model="formData.idCard" placeholder="请输入身份证号" class="form-input" maxlength="18" :disabled="isView" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                
+                <el-row :gutter="24">
+                  <el-col :span="12">
+                    <el-form-item label="性别">
+                      <el-radio-group v-model="formData.gender" :disabled="isView">
+                        <el-radio :value="1">男</el-radio>
+                        <el-radio :value="2">女</el-radio>
+                        <el-radio :value="0">未知</el-radio>
+                      </el-radio-group>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="出生日期">
+                      <el-date-picker
+                        v-model="formData.birthday"
+                        type="date"
+                        placeholder="请选择出生日期"
+                        value-format="YYYY-MM-DD"
+                        class="form-select"
+                        :disabled="isView"
+                      />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                
+                <el-row :gutter="24">
+                  <el-col :span="12">
+                    <el-form-item label="状态">
+                      <el-radio-group v-model="formData.status" :disabled="isView">
+                        <el-radio :value="1">正常</el-radio>
+                        <el-radio :value="0">禁用</el-radio>
+                      </el-radio-group>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="头像">
+                      <el-input v-model="formData.avatar" placeholder="请输入头像URL（可选）" class="form-input" :disabled="isView" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                
+                <el-form-item label="地址">
+                  <el-input v-model="formData.address" type="textarea" :rows="2" placeholder="请输入地址（可选）" class="form-textarea" :disabled="isView" />
+                </el-form-item>
+                
+                <el-form-item label="备注">
+                  <el-input v-model="formData.remark" type="textarea" :rows="3" placeholder="请输入备注（可选）" class="form-textarea" :disabled="isView" />
+                </el-form-item>
+              </el-form>
             </div>
           </div>
         </div>
@@ -387,7 +734,7 @@
       
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="dialogVisible = false" class="footer-btn">取消</el-button>
+          <el-button @click="dialogVisible = false" class="footer-btn">关闭</el-button>
           <el-button type="primary" :loading="submitLoading" @click="handleSubmit" v-if="!isView" class="footer-btn primary-btn">
             确定
           </el-button>
@@ -406,7 +753,9 @@ import {
   addPerson,
   updatePerson,
   deletePerson,
-  deletePersonBatch
+  deletePersonBatch,
+  getPersonDetailById,
+  savePersonDetail
 } from '@/api/personnel'
 import {
   getOrganizationTree
@@ -421,7 +770,21 @@ import {
   Folder,
   UserFilled,
   InfoFilled,
-  Clock
+  Clock,
+  Phone,
+  Message,
+  Location,
+  Calendar,
+  Document,
+  Briefcase,
+  Medal,
+  Money,
+  Timer,
+  Flag,
+  Footed,
+  DataLine,
+  School,
+  Warning
 } from '@element-plus/icons-vue'
 
 const loading = ref(false)
@@ -437,6 +800,7 @@ const total = ref(0)
 const tableRef = ref(null)
 const formRef = ref(null)
 const treeRef = ref(null)
+const activeTab = ref('basic')
 
 const personTypeOptions = [
   { label: '人员', value: 'PERSON' },
@@ -572,6 +936,31 @@ const formatDateTime = (date) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
+const formatDate = (date) => {
+  if (!date) return '-'
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const formatValue = (value, defaultValue = '-') => {
+  if (value === null || value === undefined || value === '') {
+    return defaultValue
+  }
+  return value
+}
+
+const getPreferredFootText = (foot) => {
+  const map = {
+    'LEFT': '左脚',
+    'RIGHT': '右脚',
+    'BOTH': '双脚'
+  }
+  return map[foot] || '-'
+}
+
 const getIndex = (index) => {
   return (pagination.pageNum - 1) * pagination.pageSize + index + 1
 }
@@ -678,9 +1067,10 @@ const handleEdit = (row) => {
 
 const handleView = async (row) => {
   try {
-    const res = await getPersonById(row.id)
+    const res = await getPersonDetailById(row.id)
     currentPerson.value = res.data
     isView.value = true
+    activeTab.value = 'basic'
     Object.assign(formData, res.data)
     if (res.data.birthday) {
       formData.birthday = res.data.birthday
@@ -1162,5 +1552,218 @@ onMounted(() => {
 .primary-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.detail-view-container {
+  width: 100%;
+}
+
+.detail-header-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.detail-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.detail-avatar {
+  background: rgba(255, 255, 255, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.detail-basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detail-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.detail-sub-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.detail-org {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.detail-tabs {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 0;
+}
+
+.detail-tabs :deep(.el-tabs__header) {
+  margin: 0;
+  padding: 0 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-tabs :deep(.el-tabs__nav-wrap::after) {
+  display: none;
+}
+
+.detail-tabs :deep(.el-tabs__item) {
+  height: 50px;
+  line-height: 50px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.detail-tabs :deep(.el-tabs__item.is-active) {
+  color: #3b82f6;
+}
+
+.detail-tabs :deep(.el-tabs__active-bar) {
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+  height: 3px;
+  border-radius: 2px;
+}
+
+.detail-tabs :deep(.el-tabs__content) {
+  padding: 20px;
+}
+
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.detail-section-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.detail-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.detail-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .detail-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.detail-info-item:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.detail-info-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.detail-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.detail-info-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detail-info-value {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-text-section {
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 12px;
+}
+
+.detail-text-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-text-label {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.detail-text-content {
+  font-size: 14px;
+  color: #1e293b;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
 }
 </style>

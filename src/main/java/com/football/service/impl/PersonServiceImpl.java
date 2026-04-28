@@ -3,12 +3,16 @@ package com.football.service.impl;
 import com.football.common.BusinessException;
 import com.football.common.Result;
 import com.football.dto.PersonDTO;
+import com.football.dto.PersonDetailDTO;
 import com.football.dto.PersonQueryDTO;
 import com.football.entity.Person;
+import com.football.entity.PersonDetail;
 import com.football.mapper.OrganizationMapper;
+import com.football.mapper.PersonDetailMapper;
 import com.football.mapper.PersonMapper;
 import com.football.service.PersonService;
 import com.football.vo.OrganizationVO;
+import com.football.vo.PersonDetailVO;
 import com.football.vo.PersonVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -43,6 +47,10 @@ public class PersonServiceImpl implements PersonService {
     // 自动注入组织机构数据访问层Mapper，用于验证部门存在性
     @Autowired
     private OrganizationMapper organizationMapper;
+
+    // 自动注入人员详细信息数据访问层Mapper
+    @Autowired
+    private PersonDetailMapper personDetailMapper;
 
     /**
      * 人员类型常量：普通人员
@@ -370,5 +378,77 @@ public class PersonServiceImpl implements PersonService {
         BeanUtils.copyProperties(dto, person);
         // 返回转换后的实体对象
         return person;
+    }
+
+    /**
+     * 根据人员ID查询完整详细信息（包含基本信息和补充信息）
+     * 实现PersonService接口中的getDetailById方法
+     *
+     * @param personId 人员ID
+     * @return Result<PersonDetailVO> 包含人员完整详细信息的统一响应对象
+     */
+    @Override
+    public Result<PersonDetailVO> getDetailById(Long personId) {
+        // 验证人员ID并获取基本信息（确保人员存在）
+        validateAndGetPerson(personId);
+        
+        // 查询完整详细信息（包含基本信息和补充信息）
+        PersonDetailVO detailVO = personDetailMapper.selectByPersonId(personId);
+        
+        // 返回查询成功的响应结果
+        return Result.success("查询成功", detailVO);
+    }
+
+    /**
+     * 保存人员详细信息（新增或更新）
+     * 实现PersonService接口中的saveDetail方法
+     * 使用@Transactional注解确保操作的事务性
+     *
+     * @param detailDTO 人员详细信息DTO
+     * @return Result<Boolean> 包含操作结果的统一响应对象
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Boolean> saveDetail(PersonDetailDTO detailDTO) {
+        // 验证人员ID是否为空
+        if (detailDTO.getPersonId() == null) {
+            throw new BusinessException("人员ID不能为空");
+        }
+        
+        // 验证人员是否存在
+        validateAndGetPerson(detailDTO.getPersonId());
+        
+        // 将DTO转换为实体对象
+        PersonDetail personDetail = convertDetailToEntity(detailDTO);
+        
+        // 检查是否已存在详细信息记录
+        PersonDetailVO existDetail = personDetailMapper.selectByPersonId(detailDTO.getPersonId());
+        
+        int rows;
+        if (existDetail != null) {
+            // 已存在，执行更新
+            rows = personDetailMapper.updateByPersonId(personDetail);
+            log.info("更新人员详细信息成功，人员ID：{}", detailDTO.getPersonId());
+        } else {
+            // 不存在，执行新增
+            rows = personDetailMapper.insert(personDetail);
+            log.info("新增人员详细信息成功，人员ID：{}", detailDTO.getPersonId());
+        }
+        
+        // 返回操作结果
+        return Result.success("保存成功", rows > 0);
+    }
+
+    /**
+     * 将PersonDetailDTO转换为PersonDetail实体
+     * 私有方法，使用Spring的BeanUtils进行属性拷贝
+     *
+     * @param dto 人员详细信息DTO
+     * @return PersonDetail 实体对象
+     */
+    private PersonDetail convertDetailToEntity(PersonDetailDTO dto) {
+        PersonDetail personDetail = new PersonDetail();
+        BeanUtils.copyProperties(dto, personDetail);
+        return personDetail;
     }
 }
