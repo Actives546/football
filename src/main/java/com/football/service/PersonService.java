@@ -2,7 +2,9 @@ package com.football.service;
 
 import com.football.common.Result;
 import com.football.dto.PersonDTO;
+import com.football.dto.PersonDetailDTO;
 import com.football.dto.PersonQueryDTO;
+import com.football.vo.PersonDetailVO;
 import com.football.vo.PersonVO;
 
 import java.util.List;
@@ -72,4 +74,20 @@ public interface PersonService {
      * @return 人员列表
      */
     Result<List<PersonVO>> getByOrgId(Long orgId);
+
+    /**
+     * 根据人员ID查询完整详细信息（包含基本信息和补充信息）
+     *
+     * @param personId 人员ID
+     * @return 人员完整详细信息
+     */
+    Result<PersonDetailVO> getDetailById(Long personId);
+
+    /**
+     * 保存人员详细信息（新增或更新）
+     *
+     * @param detailDTO 人员详细信息DTO
+     * @return 操作结果
+     */
+    Result<Boolean> saveDetail(PersonDetailDTO detailDTO);
 }

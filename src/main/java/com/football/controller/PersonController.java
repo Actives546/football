@@ -2,8 +2,10 @@ package com.football.controller;
 
 import com.football.common.Result;
 import com.football.dto.PersonDTO;
+import com.football.dto.PersonDetailDTO;
 import com.football.dto.PersonQueryDTO;
 import com.football.service.PersonService;
+import com.football.vo.PersonDetailVO;
 import com.football.vo.PersonVO;
 import org.springframework.web.bind.annotation.*;
 
@@ -102,5 +104,29 @@ public class PersonController {
     @DeleteMapping("/batch")
     public Result<Boolean> deleteBatch(@RequestBody List<Long> ids) {
         return personService.deleteBatch(ids);
+    }
+
+    /**
+     * 根据人员ID查询完整详细信息（包含基本信息和补充信息）
+     * 用于查看人员详情页面
+     *
+     * @param id 人员ID
+     * @return 人员完整详细信息
+     */
+    @GetMapping("/detail/{id}")
+    public Result<PersonDetailVO> getDetailById(@PathVariable Long id) {
+        return personService.getDetailById(id);
+    }
+
+    /**
+     * 保存人员详细信息（新增或更新）
+     * 用于编辑人员详细信息
+     *
+     * @param detailDTO 人员详细信息DTO
+     * @return 操作结果，true表示成功
+     */
+    @PostMapping("/detail")
+    public Result<Boolean> saveDetail(@RequestBody PersonDetailDTO detailDTO) {
+        return personService.saveDetail(detailDTO);
     }
 }

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.football.mapper.PersonDetailMapper">
+
+    <resultMap id="BaseResultMap" type="com.football.vo.PersonDetailVO">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="org_id" property="orgId" jdbcType="BIGINT"/>
+        <result column="org_name" property="orgName" jdbcType="VARCHAR"/>
+        <result column="person_type" property="personType" jdbcType="VARCHAR"/>
+        <result column="person_name" property="personName" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="gender" property="gender" jdbcType="INTEGER"/>
+        <result column="birthday" property="birthday" jdbcType="DATE"/>
+        <result column="id_card" property="idCard" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="avatar" property="avatar" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        
+        <result column="position" property="position" jdbcType="VARCHAR"/>
+        <result column="join_date" property="joinDate" jdbcType="DATE"/>
+        <result column="education" property="education" jdbcType="VARCHAR"/>
+        <result column="major" property="major" jdbcType="VARCHAR"/>
+        <result column="school" property="school" jdbcType="VARCHAR"/>
+        <result column="emergency_contact" property="emergencyContact" jdbcType="VARCHAR"/>
+        <result column="emergency_phone" property="emergencyPhone" jdbcType="VARCHAR"/>
+        <result column="work_experience" property="workExperience" jdbcType="VARCHAR"/>
+        
+        <result column="jersey_number" property="jerseyNumber" jdbcType="INTEGER"/>
+        <result column="field_position" property="fieldPosition" jdbcType="VARCHAR"/>
+        <result column="height" property="height" jdbcType="INTEGER"/>
+        <result column="weight" property="weight" jdbcType="INTEGER"/>
+        <result column="preferred_foot" property="preferredFoot" jdbcType="VARCHAR"/>
+        <result column="nationality" property="nationality" jdbcType="VARCHAR"/>
+        <result column="team_join_date" property="teamJoinDate" jdbcType="DATE"/>
+        <result column="contract_end_date" property="contractEndDate" jdbcType="DATE"/>
+        <result column="market_value" property="marketValue" jdbcType="DECIMAL"/>
+        <result column="technical_features" property="technicalFeatures" jdbcType="VARCHAR"/>
+        <result column="past_experience" property="pastExperience" jdbcType="VARCHAR"/>
+        <result column="detail_remark" property="detailRemark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        p.id, p.org_id, o.org_name, p.person_type, p.person_name, 
+        p.phone, p.email, p.gender, p.birthday, p.id_card, 
+        p.address, p.avatar, p.status, p.create_time, p.update_time,
+        pd.position, pd.join_date, pd.education, pd.major, pd.school,
+        pd.emergency_contact, pd.emergency_phone, pd.work_experience,
+        pd.jersey_number, pd.field_position, pd.height, pd.weight,
+        pd.preferred_foot, pd.nationality, pd.team_join_date, 
+        pd.contract_end_date, pd.market_value, pd.technical_features,
+        pd.past_experience, pd.remark as detail_remark
+    </sql>
+
+    <select id="selectByPersonId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `person` p
+        LEFT JOIN `organization` o ON p.org_id = o.id AND o.deleted = 0
+        LEFT JOIN `person_detail` pd ON p.id = pd.person_id AND pd.deleted = 0
+        WHERE p.id = #{personId} AND p.deleted = 0
+    </select>
+
+    <insert id="insert" parameterType="com.football.entity.PersonDetail" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `person_detail` (
+            person_id, position, join_date, education, major, school,
+            emergency_contact, emergency_phone, work_experience,
+            jersey_number, field_position, height, weight,
+            preferred_foot, nationality, team_join_date, contract_end_date,
+            market_value, technical_features, past_experience, remark,
+            create_time, update_time, deleted
+        ) VALUES (
+            #{personId}, #{position}, #{joinDate}, #{education}, #{major}, #{school},
+            #{emergencyContact}, #{emergencyPhone}, #{workExperience},
+            #{jerseyNumber}, #{fieldPosition}, #{height}, #{weight},
+            #{preferredFoot}, #{nationality}, #{teamJoinDate}, #{contractEndDate},
+            #{marketValue}, #{technicalFeatures}, #{pastExperience}, #{remark},
+            NOW(), NOW(), 0
+        )
+    </insert>
+
+    <update id="updateByPersonId" parameterType="com.football.entity.PersonDetail">
+        UPDATE `person_detail`
+        SET
+            position = #{position},
+            join_date = #{joinDate},
+            education = #{education},
+            major = #{major},
+            school = #{school},
+            emergency_contact = #{emergencyContact},
+            emergency_phone = #{emergencyPhone},
+            work_experience = #{workExperience},
+            jersey_number = #{jerseyNumber},
+            field_position = #{fieldPosition},
+            height = #{height},
+            weight = #{weight},
+            preferred_foot = #{preferredFoot},
+            nationality = #{nationality},
+            team_join_date = #{teamJoinDate},
+            contract_end_date = #{contractEndDate},
+            market_value = #{marketValue},
+            technical_features = #{technicalFeatures},
+            past_experience = #{pastExperience},
+            remark = #{remark},
+            update_time = NOW()
+        WHERE person_id = #{personId} AND deleted = 0
+    </update>
+
+    <update id="deleteByPersonId">
+        UPDATE `person_detail`
+        SET deleted = 1, update_time = NOW()
+        WHERE person_id = #{personId} AND deleted = 0
+    </update>
+
+</mapper>

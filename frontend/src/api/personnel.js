@@ -52,3 +52,18 @@ export function deletePersonBatch(ids) {
     data: ids
   })
 }
+
+export function getPersonDetailById(id) {
+  return request({
+    url: `/person/detail/${id}`,
+    method: 'get'
+  })
+}
+
+export function savePersonDetail(data) {
+  return request({
+    url: '/person/detail',
+    method: 'post',
+    data
+  })
+}
