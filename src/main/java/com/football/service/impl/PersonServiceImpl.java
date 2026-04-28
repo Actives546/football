@@ -383,6 +383,7 @@ public class PersonServiceImpl implements PersonService {
     /**
      * 根据人员ID查询完整详细信息（包含基本信息和补充信息）
      * 实现PersonService接口中的getDetailById方法
+     * 添加容错处理：如果person_detail表不存在或查询失败，回退到只返回基本信息
      *
      * @param personId 人员ID
      * @return Result<PersonDetailVO> 包含人员完整详细信息的统一响应对象
@@ -390,10 +391,24 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public Result<PersonDetailVO> getDetailById(Long personId) {
         // 验证人员ID并获取基本信息（确保人员存在）
-        validateAndGetPerson(personId);
+        PersonVO personVO = validateAndGetPerson(personId);
         
-        // 查询完整详细信息（包含基本信息和补充信息）
-        PersonDetailVO detailVO = personDetailMapper.selectByPersonId(personId);
+        PersonDetailVO detailVO;
+        try {
+            // 尝试查询完整详细信息（包含基本信息和补充信息）
+            detailVO = personDetailMapper.selectByPersonId(personId);
+            
+            // 如果查询结果为空或personType为空（可能person_detail表中没有记录）
+            if (detailVO == null || detailVO.getPersonType() == null) {
+                // 从PersonVO构建PersonDetailVO
+                detailVO = convertPersonVOToDetailVO(personVO);
+                log.info("人员详细信息不存在，返回基本信息，人员ID：{}", personId);
+            }
+        } catch (Exception e) {
+            // 如果查询失败（可能person_detail表不存在），回退到只返回基本信息
+            log.warn("查询人员详细信息失败，回退到基本信息，人员ID：{}，错误：{}", personId, e.getMessage());
+            detailVO = convertPersonVOToDetailVO(personVO);
+        }
         
         // 返回查询成功的响应结果
         return Result.success("查询成功", detailVO);
@@ -421,22 +436,40 @@ public class PersonServiceImpl implements PersonService {
         // 将DTO转换为实体对象
         PersonDetail personDetail = convertDetailToEntity(detailDTO);
         
-        // 检查是否已存在详细信息记录
-        PersonDetailVO existDetail = personDetailMapper.selectByPersonId(detailDTO.getPersonId());
-        
-        int rows;
-        if (existDetail != null) {
-            // 已存在，执行更新
-            rows = personDetailMapper.updateByPersonId(personDetail);
-            log.info("更新人员详细信息成功，人员ID：{}", detailDTO.getPersonId());
-        } else {
-            // 不存在，执行新增
-            rows = personDetailMapper.insert(personDetail);
-            log.info("新增人员详细信息成功，人员ID：{}", detailDTO.getPersonId());
+        try {
+            // 检查是否已存在详细信息记录
+            PersonDetailVO existDetail = personDetailMapper.selectByPersonId(detailDTO.getPersonId());
+            
+            int rows;
+            if (existDetail != null && existDetail.getId() != null) {
+                // 已存在，执行更新
+                rows = personDetailMapper.updateByPersonId(personDetail);
+                log.info("更新人员详细信息成功，人员ID：{}", detailDTO.getPersonId());
+            } else {
+                // 不存在，执行新增
+                rows = personDetailMapper.insert(personDetail);
+                log.info("新增人员详细信息成功，人员ID：{}", detailDTO.getPersonId());
+            }
+            
+            // 返回操作结果
+            return Result.success("保存成功", rows > 0);
+        } catch (Exception e) {
+            log.error("保存人员详细信息失败，人员ID：{}，错误：{}", detailDTO.getPersonId(), e.getMessage());
+            throw new BusinessException("保存详细信息失败：" + e.getMessage());
         }
-        
-        // 返回操作结果
-        return Result.success("保存成功", rows > 0);
+    }
+
+    /**
+     * 将PersonVO转换为PersonDetailVO
+     * 当person_detail表不存在或没有数据时使用
+     *
+     * @param personVO 人员基本信息VO
+     * @return PersonDetailVO 人员详细信息VO
+     */
+    private PersonDetailVO convertPersonVOToDetailVO(PersonVO personVO) {
+        PersonDetailVO detailVO = new PersonDetailVO();
+        BeanUtils.copyProperties(personVO, detailVO);
+        return detailVO;
     }
 
     /**
