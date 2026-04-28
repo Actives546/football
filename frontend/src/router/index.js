@@ -9,6 +9,7 @@ const ScheduleList = () => import('@/views/ScheduleList.vue')
 const OrganizationList = () => import('@/views/OrganizationList.vue')
 const PersonnelList = () => import('@/views/PersonnelList.vue')
 const PlayerList = () => import('@/views/PlayerList.vue')
+const TeamList = () => import('@/views/TeamList.vue')
 const Login = () => import('@/views/Login.vue')
 const Register = () => import('@/views/Register.vue')
 
@@ -59,6 +60,12 @@ const routes = [
         name: 'PlayerList',
         component: PlayerList,
         meta: { title: '球员管理', requiresAuth: true }
+      },
+      {
+        path: 'team/list',
+        name: 'TeamList',
+        component: TeamList,
+        meta: { title: '球队管理', requiresAuth: true }
       }
     ]
   },
