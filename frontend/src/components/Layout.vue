@@ -43,6 +43,10 @@
             <el-icon><Calendar /></el-icon>
             <template #title>赛季管理</template>
           </el-menu-item>
+          <el-menu-item index="/schedule/list">
+            <el-icon><Timer /></el-icon>
+            <template #title>赛程信息管理</template>
+          </el-menu-item>
         </el-sub-menu>
         
         <el-sub-menu index="personnel">
@@ -124,6 +128,7 @@ import {
   Trophy,
   List,
   Calendar,
+  Timer,
   Fold,
   Expand,
   UserFilled,

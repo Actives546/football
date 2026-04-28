@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.football.mapper.ScheduleMapper">
+
+    <resultMap id="BaseResultMap" type="com.football.vo.ScheduleVO">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="season_id" property="seasonId" jdbcType="BIGINT"/>
+        <result column="season_name" property="seasonName" jdbcType="VARCHAR"/>
+        <result column="match_id" property="matchId" jdbcType="BIGINT"/>
+        <result column="match_name" property="matchName" jdbcType="VARCHAR"/>
+        <result column="schedule_name" property="scheduleName" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="location" property="location" jdbcType="VARCHAR"/>
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        s.id, s.season_id, se.season_name, se.match_id, m.match_name, 
+        s.schedule_name, s.status, s.location, s.start_time, 
+        s.create_time, s.update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `schedule` s
+        LEFT JOIN `season` se ON s.season_id = se.id AND se.deleted = 0
+        LEFT JOIN `match` m ON se.match_id = m.id AND m.deleted = 0
+        WHERE s.id = #{id} AND s.deleted = 0
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `schedule` s
+        LEFT JOIN `season` se ON s.season_id = se.id AND se.deleted = 0
+        LEFT JOIN `match` m ON se.match_id = m.id AND m.deleted = 0
+        WHERE s.deleted = 0
+        <if test="query.seasonId != null">
+            AND s.season_id = #{query.seasonId}
+        </if>
+        <if test="query.scheduleName != null and query.scheduleName != ''">
+            AND s.schedule_name LIKE CONCAT('%', #{query.scheduleName}, '%')
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND s.status = #{query.status}
+        </if>
+        <if test="query.location != null and query.location != ''">
+            AND s.location LIKE CONCAT('%', #{query.location}, '%')
+        </if>
+        ORDER BY s.start_time DESC, s.create_time DESC
+        <if test="query.pageNum != null and query.pageSize != null">
+            LIMIT #{query.pageSize} OFFSET #{query.offset}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM `schedule` s
+        WHERE s.deleted = 0
+        <if test="query.seasonId != null">
+            AND s.season_id = #{query.seasonId}
+        </if>
+        <if test="query.scheduleName != null and query.scheduleName != ''">
+            AND s.schedule_name LIKE CONCAT('%', #{query.scheduleName}, '%')
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND s.status = #{query.status}
+        </if>
+        <if test="query.location != null and query.location != ''">
+            AND s.location LIKE CONCAT('%', #{query.location}, '%')
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.football.entity.Schedule" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `schedule` (
+            season_id, schedule_name, status, location, start_time,
+            create_time, update_time, deleted
+        ) VALUES (
+            #{seasonId}, #{scheduleName}, #{status}, #{location}, #{startTime},
+            NOW(), NOW(), 0
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.football.entity.Schedule">
+        UPDATE `schedule`
+        SET
+            season_id = #{seasonId},
+            schedule_name = #{scheduleName},
+            status = #{status},
+            location = #{location},
+            start_time = #{startTime},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE `schedule`
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteByIds">
+        UPDATE `schedule`
+        SET deleted = 1, update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+    <select id="selectBySeasonId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `schedule` s
+        LEFT JOIN `season` se ON s.season_id = se.id AND se.deleted = 0
+        LEFT JOIN `match` m ON se.match_id = m.id AND m.deleted = 0
+        WHERE s.season_id = #{seasonId} AND s.deleted = 0
+        ORDER BY s.start_time DESC
+    </select>
+
+</mapper>
