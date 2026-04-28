@@ -500,7 +500,7 @@
                   </div>
                   <div class="detail-info-item">
                     <div class="detail-info-icon" style="color: #f59e0b;">
-                      <el-icon><Footed /></el-icon>
+                      <el-icon><Trophy /></el-icon>
                     </div>
                     <div class="detail-info-content">
                       <span class="detail-info-label">惯用脚</span>
@@ -781,7 +781,7 @@ import {
   Money,
   Timer,
   Flag,
-  Footed,
+  Trophy,
   DataLine,
   School,
   Warning
