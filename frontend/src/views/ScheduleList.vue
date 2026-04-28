@@ -114,21 +114,23 @@
             <span class="index-text">{{ getIndex($index) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="matchName" label="所属赛事" min-width="120" show-overflow-tooltip>
+        <el-table-column prop="matchName" label="所属赛事" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="match-name-cell">
-              <el-tag size="small" type="primary" effect="light">
+              <el-tag v-if="row.matchName" size="small" type="primary">
                 {{ row.matchName }}
               </el-tag>
+              <span v-else class="empty-text">-</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="seasonName" label="所属赛季" min-width="120" show-overflow-tooltip>
+        <el-table-column prop="seasonName" label="所属赛季" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="season-name-cell">
-              <el-tag size="small" type="success" effect="light">
+              <el-tag v-if="row.seasonName" size="small" type="success">
                 {{ row.seasonName }}
               </el-tag>
+              <span v-else class="empty-text">-</span>
             </div>
           </template>
         </el-table-column>
@@ -576,7 +578,7 @@ const handleEdit = (row) => {
   isView.value = false
   Object.assign(formData, row)
   if (row.startTime) {
-    formData.startTime = new Date(row.startTime)
+    formData.startTime = formatDateTime(row.startTime)
   }
   currentSchedule.value = { ...row }
   dialogVisible.value = true
@@ -589,7 +591,7 @@ const handleView = async (row) => {
     isView.value = true
     Object.assign(formData, res.data)
     if (res.data.startTime) {
-      formData.startTime = new Date(res.data.startTime)
+      formData.startTime = formatDateTime(res.data.startTime)
     }
     dialogVisible.value = true
   } catch (error) {
@@ -795,6 +797,11 @@ onMounted(() => {
   color: #64748b;
 }
 
+.empty-text {
+  color: #909399;
+  font-size: 14px;
+}
+
 .match-name-cell {
   display: flex;
   align-items: center;
@@ -823,12 +830,17 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .schedule-name {
   font-weight: 500;
   color: #1e293b;
   font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .location-cell {
