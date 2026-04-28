@@ -79,6 +79,24 @@
               <el-icon><Delete /></el-icon>
               批量删除
             </el-button>
+            <el-upload
+              ref="uploadRef"
+              :action="uploadUrl"
+              :headers="uploadHeaders"
+              :before-upload="beforeUpload"
+              :on-success="onUploadSuccess"
+              :on-error="onUploadError"
+              :limit="1"
+              :auto-upload="false"
+              :show-file-list="false"
+              accept=".xls,.xlsx,.csv"
+              style="display: inline-block"
+            >
+              <el-button type="warning" @click="handleImportClick">
+                <el-icon><Upload /></el-icon>
+                导入数据
+              </el-button>
+            </el-upload>
             <el-button type="success" @click="handleExport">
               <el-icon><Download /></el-icon>
               导出数据
@@ -188,6 +206,58 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
+    
+    <el-dialog
+      v-model="importResultVisible"
+      title="导入结果"
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
+      class="import-result-dialog"
+    >
+      <div class="import-result-content">
+        <div class="import-result-summary">
+          <div class="result-item success">
+            <div class="result-icon success-icon">
+              <el-icon :size="20"><CircleCheck /></el-icon>
+            </div>
+            <div class="result-info">
+              <span class="result-count">{{ importResult.successCount }}</span>
+              <span class="result-label">成功</span>
+            </div>
+          </div>
+          <div class="result-item fail">
+            <div class="result-icon fail-icon">
+              <el-icon :size="20"><CircleClose /></el-icon>
+            </div>
+            <div class="result-info">
+              <span class="result-count">{{ importResult.failCount }}</span>
+              <span class="result-label">失败</span>
+            </div>
+          </div>
+        </div>
+        <div class="import-result-details" v-if="importResult.failDetails && importResult.failDetails.length > 0">
+          <div class="details-header">
+            <el-icon :size="16"><Document /></el-icon>
+            <span class="details-title">失败详情</span>
+          </div>
+          <el-table
+            :data="importResult.failDetails"
+            style="width: 100%"
+            size="small"
+            border
+          >
+            <el-table-column prop="rowNum" label="行号" width="80" align="center" />
+            <el-table-column prop="error" label="错误原因" show-overflow-tooltip />
+          </el-table>
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="importResultVisible = false" class="footer-btn">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
     
     <el-dialog
       v-model="dialogVisible"
@@ -333,7 +403,8 @@ import {
   deleteTeamBatch,
   exportTeam,
   enableTeamBatch,
-  disableTeamBatch
+  disableTeamBatch,
+  importTeam
 } from '@/api/team'
 import {
   Search,
@@ -343,11 +414,13 @@ import {
   View,
   Edit,
   Download,
+  Upload,
   Trophy,
   InfoFilled,
   Clock,
   CircleCheck,
-  CircleClose
+  CircleClose,
+  Document
 } from '@element-plus/icons-vue'
 
 const loading = ref(false)
@@ -361,6 +434,19 @@ const tableData = ref([])
 const total = ref(0)
 const tableRef = ref(null)
 const formRef = ref(null)
+const uploadRef = ref(null)
+const uploading = ref(false)
+const importResultVisible = ref(false)
+const importResult = ref({
+  successCount: 0,
+  failCount: 0,
+  failDetails: []
+})
+
+const uploadUrl = computed(() => '/api/team/import')
+const uploadHeaders = computed(() => ({
+  'Authorization': 'Bearer ' + localStorage.getItem('token')
+}))
 
 const statusOptions = [
   { label: '启用', value: 1 },
@@ -652,6 +738,73 @@ const handleExport = async () => {
     ElMessage.error('导出失败')
     console.error(error)
   }
+}
+
+const handleImportClick = () => {
+  ElMessageBox.confirm('请确保导入的文件格式正确。\n\n支持的格式：.xls、.xlsx、.csv\n\nExcel列顺序：\n球队名称、地区、成立时间、主场、主教练、联系人、状态、简介\n\n状态值：启用/1 或 禁用/0', '导入提示', {
+    confirmButtonText: '选择文件',
+    cancelButtonText: '取消',
+    type: 'info'
+  }).then(() => {
+    if (uploadRef.value) {
+      uploadRef.value.$el.querySelector('input[type="file"]').click()
+    }
+  }).catch(() => {})
+}
+
+const beforeUpload = (file) => {
+  const fileName = file.name
+  const fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase()
+  const allowedExtensions = ['xls', 'xlsx', 'csv']
+  
+  if (!allowedExtensions.includes(fileExtension)) {
+    ElMessage.error('文件格式不正确，仅支持 .xls、.xlsx、.csv 格式')
+    return false
+  }
+  
+  const maxSize = 10 * 1024 * 1024
+  if (file.size > maxSize) {
+    ElMessage.error('文件大小不能超过 10MB')
+    return false
+  }
+  
+  return true
+}
+
+const onUploadSuccess = async (response) => {
+  uploading.value = false
+  
+  if (response.code === 200) {
+    importResult.value = response.data || {
+      successCount: 0,
+      failCount: 0,
+      failDetails: []
+    }
+    
+    const total = importResult.value.successCount + importResult.value.failCount
+    
+    if (importResult.value.successCount > 0 && importResult.value.failCount === 0) {
+      ElMessage.success(`导入成功，共 ${importResult.value.successCount} 条数据`)
+      loadTableData()
+    } else if (importResult.value.successCount === 0 && importResult.value.failCount > 0) {
+      ElMessage.error(`导入失败，共 ${importResult.value.failCount} 条数据`)
+      importResultVisible.value = true
+    } else {
+      ElMessage.warning(`部分导入成功，成功 ${importResult.value.successCount} 条，失败 ${importResult.value.failCount} 条`)
+      importResultVisible.value = true
+      if (importResult.value.successCount > 0) {
+        loadTableData()
+      }
+    }
+  } else {
+    ElMessage.error(response.message || '导入失败')
+  }
+}
+
+const onUploadError = (error) => {
+  uploading.value = false
+  console.error('上传错误:', error)
+  ElMessage.error('上传失败，请稍后重试')
 }
 
 const handleSubmit = async () => {
@@ -997,5 +1150,108 @@ onMounted(() => {
 .primary-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.import-result-dialog :deep(.el-dialog) {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.import-result-dialog :deep(.el-dialog__header) {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(to right, #f8fafc, #ffffff);
+}
+
+.import-result-dialog :deep(.el-dialog__title) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.import-result-dialog :deep(.el-dialog__body) {
+  padding: 24px;
+  background: #fafafa;
+}
+
+.import-result-content {
+  min-height: 100px;
+}
+
+.import-result-summary {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 24px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.result-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+}
+
+.fail-icon {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+}
+
+.result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.result-count {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.result-label {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.import-result-details {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.details-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.details-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.import-result-dialog :deep(.el-dialog__footer) {
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
 }
 </style>

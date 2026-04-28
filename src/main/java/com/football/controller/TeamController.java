@@ -6,9 +6,11 @@ import com.football.dto.TeamQueryDTO;
 import com.football.service.TeamService;
 import com.football.vo.TeamVO;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -138,5 +140,29 @@ public class TeamController {
     @PostMapping("/disable")
     public Result<Boolean> disableBatch(@RequestBody List<Long> ids) {
         return teamService.updateStatusBatch(ids, 0);
+    }
+
+    /**
+     * 导入球队数据
+     * 
+     * 支持的文件格式：.xls、.xlsx、.csv
+     * Excel列顺序：球队名称、地区、成立时间、主场、主教练、联系人、状态、简介
+     * 状态值：启用/1 或 禁用/0
+     * 
+     * @param file 上传的文件
+     * @return 导入结果，包含成功数量、失败数量和失败详情
+     */
+    @PostMapping("/import")
+    public Result<Map<String, Object>> importTeams(@RequestParam("file") MultipartFile file) {
+        try {
+            // 获取文件名
+            String fileName = file.getOriginalFilename();
+            // 获取文件字节数组
+            byte[] fileBytes = file.getBytes();
+            // 调用Service层进行导入
+            return teamService.importTeams(fileBytes, fileName);
+        } catch (IOException e) {
+            throw new RuntimeException("读取文件失败：" + e.getMessage(), e);
+        }
     }
 }
