@@ -261,13 +261,13 @@
               
               <el-row :gutter="24">
                 <el-col :span="12">
-                  <el-form-item label="手机号">
-                    <el-input v-model="formData.phone" placeholder="请输入手机号" class="form-input" :disabled="isView" />
+                  <el-form-item label="手机号" prop="phone">
+                    <el-input v-model="formData.phone" placeholder="请输入手机号（可选）" class="form-input" :disabled="isView" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="邮箱">
-                    <el-input v-model="formData.email" placeholder="请输入邮箱" class="form-input" :disabled="isView" />
+                  <el-form-item label="邮箱" prop="email">
+                    <el-input v-model="formData.email" placeholder="请输入邮箱（可选）" class="form-input" :disabled="isView" />
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -453,6 +453,12 @@ const formRules = {
   ],
   orgId: [
     { required: true, message: '请选择所属部门', trigger: 'change' }
+  ],
+  phone: [
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
+  ],
+  email: [
+    { pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: '请输入正确的邮箱格式', trigger: 'blur' }
   ]
 }
 
