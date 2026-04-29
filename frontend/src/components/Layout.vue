@@ -71,6 +71,11 @@
             <template #title>球员管理</template>
           </el-menu-item>
         </el-sub-menu>
+        
+        <el-menu-item index="/news/list">
+          <el-icon><Document /></el-icon>
+          <template #title>新闻管理</template>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     
@@ -145,7 +150,8 @@ import {
   SwitchButton,
   Football,
   OfficeBuilding,
-  Location
+  Location,
+  Document
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
