@@ -11,6 +11,7 @@ const PersonnelList = () => import('@/views/PersonnelList.vue')
 const PlayerList = () => import('@/views/PlayerList.vue')
 const TeamList = () => import('@/views/TeamList.vue')
 const StadiumList = () => import('@/views/StadiumList.vue')
+const NewsList = () => import('@/views/NewsList.vue')
 const Login = () => import('@/views/Login.vue')
 const Register = () => import('@/views/Register.vue')
 
@@ -73,6 +74,12 @@ const routes = [
         name: 'StadiumList',
         component: StadiumList,
         meta: { title: '场地管理', requiresAuth: true }
+      },
+      {
+        path: 'news/list',
+        name: 'NewsList',
+        component: NewsList,
+        meta: { title: '新闻管理', requiresAuth: true }
       }
     ]
   },
