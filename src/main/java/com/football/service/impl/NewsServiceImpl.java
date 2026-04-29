@@ -29,7 +29,7 @@ public class NewsServiceImpl implements NewsService {
     @Autowired
     private NewsMapper newsMapper;
 
-    private static final List<String> VALID_CATEGORIES = Arrays.asList("赛事新闻", "官方通知", "精彩回顾", "说说");
+
     private static final List<String> VALID_STATUSES = Arrays.asList("草稿", "已发布", "已下架");
 
     @Override
@@ -181,9 +181,6 @@ public class NewsServiceImpl implements NewsService {
         }
         if (!StringUtils.hasText(newsDTO.getCategory())) {
             throw new BusinessException("新闻分类不能为空");
-        }
-        if (!VALID_CATEGORIES.contains(newsDTO.getCategory())) {
-            throw new BusinessException("无效的新闻分类");
         }
         if (!StringUtils.hasText(newsDTO.getStatus())) {
             throw new BusinessException("发布状态不能为空");

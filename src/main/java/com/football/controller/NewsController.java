@@ -21,6 +21,7 @@ public class NewsController {
 
     @GetMapping("/{id}")
     public Result<NewsVO> getById(@PathVariable Long id) {
+
         return newsService.getById(id);
     }
 
