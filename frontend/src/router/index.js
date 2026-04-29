@@ -12,6 +12,7 @@ const PlayerList = () => import('@/views/PlayerList.vue')
 const TeamList = () => import('@/views/TeamList.vue')
 const StadiumList = () => import('@/views/StadiumList.vue')
 const NewsList = () => import('@/views/NewsList.vue')
+const TalkList = () => import('@/views/TalkList.vue')
 const Login = () => import('@/views/Login.vue')
 const Register = () => import('@/views/Register.vue')
 
@@ -80,6 +81,12 @@ const routes = [
         name: 'NewsList',
         component: NewsList,
         meta: { title: '新闻管理', requiresAuth: true }
+      },
+      {
+        path: 'talk/list',
+        name: 'TalkList',
+        component: TalkList,
+        meta: { title: '说说管理', requiresAuth: true }
       }
     ]
   },

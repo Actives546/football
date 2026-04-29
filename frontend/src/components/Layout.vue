@@ -76,6 +76,11 @@
           <el-icon><Document /></el-icon>
           <template #title>新闻管理</template>
         </el-menu-item>
+        
+        <el-menu-item index="/talk/list">
+          <el-icon><ChatDotRound /></el-icon>
+          <template #title>说说管理</template>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     
@@ -151,7 +156,8 @@ import {
   Football,
   OfficeBuilding,
   Location,
-  Document
+  Document,
+  ChatDotRound
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
